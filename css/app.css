@@ -1,29 +1,85 @@
 /* APP CSS */
 
+#page .bgtop, #page .bgbtm {
+	height: 0;
+}
+
+#page #sidebar {
+	display: none;
+}
 
 #content {
-	width:960px;
-	padding-top:25px;
-	margin:0 auto;
+	border-top:1px solid #ccc;
+	width: 1000px;
+	padding-top:20px;
+	padding-left: 0;
 }
+
+#page .content-bg {
+	background: url("../images/admin-page-content-bg-02.png") repeat-y left top;
+	margin-left: 35px;
+	padding: 0;
+}
+
+.container {
+	width: 1000px;
+}
+
 
 .graph {
 	width:100%;
 	height:400px;
 }
 
+.graph-name {
+	text-decoration: underline;
+	padding-bottom: 9px;
+	text-transform: uppercase;
+	font-size: 14px;
+}
+
 .sensor-name {
 	text-transform: capitalize;
 	font-weight: bold;
 }
-
+/*
 .nav-tabs.nav-stacked>li:first-child>a {
 	border-radius: 0;
 }
 
-	.sensor-name a {
-		width:70%;
-		float:left;
+*/
+
+.nav .collapse {
+	display: none;
+}
+
+h3 {
+	font-family: "open sans", Helvetica, Arial;
+}
+
+.collapsed .collapse {
+	display: block;
+}
+
+	.sensor-name i.glyphicon {
+		-webkit-transform: rotate(0deg);
+		-moz-transform: rotate(0deg);
+		-o-transform: rotate(0deg);
+		-ms-transform: rotate(0deg);
+		transform: rotate(0deg);
+		-webkit-transition: all 0.2s linear;
+		-moz-transition: all 0.2s linear;
+		-o-transition: all 0.2s linear;
+		-ms-transition: all 0.2s linear;
+		transition: all 0.2s linear;
+	}
+	.sensor-name.collapsed i.glyphicon {
+
+		-webkit-transform: rotate(90deg);
+		-moz-transform: rotate(90deg);
+		-o-transform: rotate(90deg);
+		-ms-transform: rotate(90deg);
+		transform: rotate(90deg);
 	}
 
 	.sensor-name a.sensor-name-icon {
@@ -40,12 +96,34 @@
 		text-transform: capitalize;
 	}
 
-	.sensor-unit span{
+	.sensor-unit span.label {
 		position:relative;
 		top:-4px;
 	}
 
+.value-choice label{
+	position: relative;
+	vertical-align: middle;
+	line-height: 36px;
+	font-weight: bold;
+}
+
+
 footer {
 	width:960px;
 	margin:0 auto;
+}
+
+.ui-timepicker td .ui-state-default {
+	border: 0px;
+	background: none;
+	margin-bottom: 0px;
+	padding: 5px;
+	color: gray;
+	text-align: center;
+	filter: none;
+}
+
+.ui-timepicker .ui-timepicker-title {
+
 }

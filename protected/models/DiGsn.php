@@ -94,10 +94,10 @@ class DiGsn extends CActiveRecord
 			array('city, state, username, password, database_schema, database_user', 'length', 'max'=>30),
 			array('is_active, is_dummy', 'length', 'max'=>1),
 			array('gsn_ip', 'length', 'max'=>16),
-                        array('notification_folder, notification_backup_folder','length','max'=>150),
+                        array('gsn_home_folder, notification_folder, notification_backup_folder','length','max'=>150),
                         array('sftp_username,sftp_password','length','max'=>50),
 			array('last_change, date_activated_id, date_deactivated_id, database_password', 'safe'),
-                        array('database_password, username, password, database_schema, database_user, sftp_username,sftp_password, gsn_name, gsn_url, gsn_port, port_ssl, database_port, notification_folder, notification_backup_folder','required'),
+                        array('database_password, username, password, database_user, gsn_name, gsn_url, gsn_port, database_port, notification_folder, notification_backup_folder, gsn_home_folder','required'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('is_active_privilege, user_id, gsn_id, gsn_name, gsn_url, city, state, last_change, is_active, is_dummy, date_activated_id, date_deactivated_id, gsn_ip, gsn_port, port_ssl', 'safe', 'on'=>'search'),			

@@ -11,6 +11,7 @@ class ContactForm extends CFormModel
 	public $subject;
 	public $body;
 	public $verifyCode;
+	public $message;
 
 	/**
 	 * Declares the validation rules.

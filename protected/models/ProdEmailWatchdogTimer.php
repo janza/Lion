@@ -115,7 +115,7 @@ class ProdEmailWatchdogTimer extends CActiveRecord
                 $body = $body . "\nFor some reason XML file was not saved properly in the variable and program did not stop!Exit command does not work properly!\n";
             $body .= "\n\nEmail watchdog timer transfering process finished! Time: " . date('Y-m-d H:i:s');
 
-            mail("hyracoidea@gmail.com", $subject, $body, $headers);
+            mail("leonard.beus@fer.hr", $subject, $body, $headers);
         }
 
         return parent::beforeSave();
@@ -130,7 +130,7 @@ class ProdEmailWatchdogTimer extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('time_watchdog_asked, time_watchdog_approved, sensor_id, user_id', 'numerical', 'integerOnly'=>true),
+			array('gsn_id, sensor_id, user_id', 'numerical', 'integerOnly'=>true),
 			array('is_active', 'length', 'max'=>1),
 			array('sensor_name', 'length', 'max'=>40),
 			array('xml_name, email', 'length', 'max'=>150),
@@ -233,7 +233,7 @@ class ProdEmailWatchdogTimer extends CActiveRecord
 		        '                    def recipients = ["' . $email_notification['email'] . '"]; // Define one or more recipients' . "\n" .
 		        '' . "\n" .
 		        '' . "\n" .
-		        '                    def EmailTitle ="Obavijest sustava GSN!!!";' . "\n" .
+		        '                    def emailTitle ="Watchdog information!!!";' . "\n" .
 		        '                    def emailContent="";' . "\n" .
 		        ' ' . "\n" .
 		        '                    //end of data definition' . "\n" .
@@ -241,11 +241,11 @@ class ProdEmailWatchdogTimer extends CActiveRecord
 		        ' ' . "\n" .
 		        '					 if (notificationState == 0){ '. "\n" .
 		        '    	             	updateNotificationVSXMLState(filePath, 1); '. "\n" .
-		        '                       emailContent=\'Korisnice '.$user_data['first_name'].' '.$user_data['last_name'].',\\n nadzor senzora \' + sensorName + \' je ponovno ukljucen!!!\'; '."\n".
+		        '                       emailContent=\'\\nWatchdog for sensor \' + sensorName + \' on server '.$gsn_data['gsn_name'].' is activated!\'; '."\n".
 		        '                       sendEmail(recipients, emailTitle, emailContent); '. "\n" .
 		        '                    }else if (notificationState == 2){  '."\n".
 		        '    	                updateNotificationVSXMLState(filePath, 1); '."\n".
-		        '                       emailContent=\'Korisnice '.$user_data['first_name'].' '.$user_data['last_name'].',\\n senzor \' + sensorName + \' je proradio!!!\'; '."\n".
+		        '                       emailContent=\'\\nSensor \' + sensorName + \' on server '.$gsn_data['gsn_name'].' started receiving readings!!!\'; '."\n".
 		        '                       sendEmail(recipients, emailTitle, emailContent); '."\n".
 		        '                    }]]></param>' . "\n" .
 		        '      <param name="sensor-name">'.$sensor_data['sensor_name'].'</param>'. "\n" .
@@ -264,20 +264,19 @@ class ProdEmailWatchdogTimer extends CActiveRecord
 		        '                    }'."\n".
 		        '                    else {'."\n".
 		        '                          def timeDifference = currentTime - lastProcessedTime;'."\n".
-		        '                          def criticalPeriodMinutes = criticalPeriod/60000;'."\n".
-		        '                          def criticalPeriodSeconds = criticalPeriod%60000;'."\n".
+		        '                          def criticalPeriodMinutes = (int)(criticalPeriod/60000);'."\n".
+		        '                          def criticalPeriodSeconds = (int)(criticalPeriod-criticalPeriodMinutes*60000)/1000;'."\n".
 		        '                          if (timeDifference >= criticalPeriod) {'."\n".
 		        '        	                      switch(notificationState){'."\n".
 		        '        			                  case 0: break;'."\n".      			
-		        '        			                  case 1:	emailTitle = \'Obavijest sustava GSN\';'."\n".
-		        '            				                    emailContent = \'Korisnice '.$user_data['first_name'].' '.$user_data['last_name'].',\\nsenzor \' + sensorName +  \'je prestao primati ocitanja!!!\\nOve obavijesti sustav salje ukoliko osjetilo nije primilo ocitanje barem \' +criticalPeriodMinutes + \'min\' + criticalPeriodSeconds + \'s !\';'."\n".                                                     
+		        '        			                  case 1:	emailTitle = \'Watchdog warning!!!\';'."\n".
+		        '            				                    emailContent = \'\\nSensor \' + sensorName +  \' on server '. $gsn_data['gsn_name'].' stopped receiving readings!!!\\nThis warning messages system sends if sensor has not received reading at least \' +criticalPeriodMinutes + \' min  \' + criticalPeriodSeconds + \' s !\';'."\n".                                                     
 					'												sendEmail(recipients, emailTitle, emailContent);'."\n".
-					'												updateNotificationVSXMLState(filePath, 2);'."\n".
-					'												updateNotificationVSXMLErrorMessageTime(filePath, currentTime);'."\n".
+					'												updateNotificationVSXMLErrorMessageTimeAndNotificationState(filePath, currentTime,2);'."\n".
 					'												break;'."\n".	
-		        '            		                  case 2: emailTitle = \'Obavijest sustava GSN\';'."\n".
-					'            				                  emailContent = \'Korisnice '.$user_data['first_name'].' '.$user_data['last_name'].',\\n senzor \' + sensorName + \' je prestao primati ocitanja!!!\\nOve obavijesti sustav salje ukoliko osjetilo nije primilo ocitanje barem \' +criticalPeriodMinutes + \'min\' + criticalPeriodSeconds + \' s !\\nObavijesti mozete iskljuciti na linku http://www.gsn.com?watchdog_id='.$id.'\';'."\n". 
-		        '            				                  if((currentTime-lastErrorMessageTime) >= delay ){'."\n".
+		        '            		                  case 2: emailTitle = \'Watchdog warning!!!\';'."\n".
+					'            				                  emailContent = \'\\nSensor \' + sensorName + \' on server '.$gsn_data['gsn_name'].' stopped receiving readings!!!\\nThis warning messages system sends if sensor has not received reading at least \' +criticalPeriodMinutes + \' min  \' + criticalPeriodSeconds + \' s !\\n\\nTo disable this warning messages go to http://161.53.67.224/lion/index.php/webService/WatchdogDisableService?watchdog_id='.$id.'&type=E-mail\';'."\n". 
+		        '            				                  if((currentTime-lastErrorMessageTime) > delay ){'."\n".
 		        '                                               sendEmail(recipients, emailTitle, emailContent);'."\n".
 		        '                                               updateNotificationVSXMLErrorMessageTime(filePath, currentTime);'."\n".
 		        '            				                  }'."\n".
@@ -288,7 +287,7 @@ class ProdEmailWatchdogTimer extends CActiveRecord
 		        '    </init-params>' . "\n" .
 		        '    <output-structure />' . "\n" .
 		        '  </processing-class>' . "\n" .
-		        '  <description>Nadzor senzora '.$sensor_data['sensor_name'].'</description>' . "\n" .
+		        '  <description>Watchdog for sensor '.$sensor_data['sensor_name'].'</description>' . "\n" .
 		        '  <addressing />' . "\n" .
 		        '  <storage history-size="1" />' . "\n" .
 		        '  <streams>' . "\n" .

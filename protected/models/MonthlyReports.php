@@ -107,18 +107,16 @@ class MonthlyReports extends CActiveRecord
 	}
 
         public function beforeSave(){
+	    	$headers = "From: " . Yii::app()->params['adminEmail'] . "\r\nReply-To: " . Yii::app()->params['adminEmail'];
+	$subject = "Monthly report";
+	$start = "Time: " . date('Y-m-d H:i:s');
             if ($this->isNewRecord) {
-                //$this->time_notification_asked = new CDbExpression('NOW()');
                 $this->is_active = '0';
-                //$this->user_id = Yii::app()->user->id;
-                //$body = "New notification has been saved!";
             } else {
-    //            if ($this->is_active == '0')
-    //                $this->is_active = '1';
-    //            else
-    //                $this->is_active = '0';
+		mail("hyracoidea@gmail.com", $subject, $start . "\n" ."Saving finished for".$this->report_id."! Activity ".$this->is_active."! Time: " . date('Y-m-d H:i:s'), $headers);
+
             }
 
-                    return parent::beforeSave();
+            return parent::beforeSave();
         }
 }

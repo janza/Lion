@@ -5,7 +5,7 @@ class GraphsController extends Controller
 	/**
 	 * Declares class-based actions.
 	 */
-	public $layout = 'graph-main';
+	public $layout = 'main_after_login';
 
 
 	public function actions()

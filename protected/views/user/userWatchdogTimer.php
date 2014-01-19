@@ -4,60 +4,62 @@ $this->breadcrumbs = array(
     'Watchdog timers',
 );
 ?>
-
 <div class="post">
     <p class="date"><?php echo date("M"); ?><b><?php echo date("j"); ?></b></p>
     <h2 class="title">New watchdog timer</h2>
     <p class="posted">Lion development team</p>
     <div class="entry">
 	<div class="roundedBox" id="type1">
-	    <p>Fill in the form with data for your new watchdog timer</p>
+	    <p>Fill in the form with data for your new notification</p>
 	    <div class="form">
 		<?php
 		$form = $this->beginWidget('CActiveForm', array(
-			    'id' => 'watchdog-form',
+			    'id' => 'notification-form',
 			    'enableClientValidation' => true,
 			    //'enableAjaxValidation' => true,
 			    'clientOptions' => array(
 				'validateOnSubmit' => true,
 			    ),
+				'skin' => false
 			));
 		?>
 		<p class="note">Fields with <span class="required">*</span> are required.</p>
 		<?php echo $form->errorSummary($model); ?>
 
 		<h3>Watchdog timer information</h3>
-		<div class="row">
+
+		<div style="border-top-style:solid;">
+		<div class="row compactRadioGroup">
 		    <?php echo $form->labelEx($model, 'watchdog_type'); ?>
-		    <div class="compactRadioGroup">
 			<?php
 			echo $form->radioButtonList($model, 'watchdog_type',
 				array(1 => 'SMS',
 				    2 => 'E-mail',
 				), array('separator' => "  ",
-			    'onChange' => 'reload(this.form)',
+			   // 'onChange' => 'reload(this.form)',
 			    'uncheckValue' => null,
 				// 'onChange'=>CHtml::ajax(array('type'=>'POST', 'url'=>CController::createUrl('dynamicRecipients'),'update'=>'#recipients', ))
 			));
 			?>
-		    </div>
 		    <?php echo $form->error($model, 'watchdog_type'); ?>
     		</div>
 
     		<div class="row">
 		    <?php echo $form->labelEx($model, 'critical_period'); ?>
 		    <?php $model->critical_period = (isset($_GET['critical_period']) ? $_GET['critical_period'] : null);
-			echo $form->textField($model, 'critical_period'); ?>
+			echo $form->textField($model, 'critical_period'); ?>&nbsp[<b>ms</b>]
 		    <?php echo $form->error($model, 'critical_period'); ?>
     		</div>
     		<div class="row">
 		    <?php echo $form->labelEx($model, 'minimal_delay_between_emails'); ?>
 		    <?php $model->minimal_delay_between_emails = (isset($_GET['minimal_delay_between_emails']) ? $_GET['minimal_delay_between_emails'] : null);
-			echo $form->textField($model, 'minimal_delay_between_emails'); ?>
+			echo $form->textField($model, 'minimal_delay_between_emails'); ?>&nbsp[<b>ms</b>]
 		    <?php echo $form->error($model, 'minimal_delay_between_emails'); ?>
     		</div>
+		</div>
 
     		<h3>Sensor information</h3>
+		<div style="border-top-style:solid;">
     		<div class="row">
 		    <?php echo $form->labelEx($model, 'gsn_list'); ?>
 		    <?php
@@ -99,30 +101,39 @@ $this->breadcrumbs = array(
 		    <?php echo $form->error($model, 'sensor_list'); ?>
     		</div>
 
-    		
-
-    		<h3>Recipients</h3>
+		</div>
+		<div id="email">
 		<?php //$this->renderPartial('_notification_recipients', array('model'=> $model,'form'=>$form));   ?>
-		<?php if ($model->watchdog_type == 2) : ?>
-
+		<?php //if ($model->watchdog_type == 1) : ?>
+	    		<h3>Recipients</h3>
+			<div style="border-top-style:solid;">
+	    		<p>If you want to enter multiple recipients here, separate them with comma (<b>,</b>)</p>
+	    		<p>Example: your.email@company.com, your.college.email@companytwo.com</p>
 	    		<div class="row">
 		    <?php echo $form->labelEx($model, 'email'); ?>
 		    <?php echo $form->textField($model, 'email'); ?>
 		    <?php //echo $form->error($model,'email'); ?>
 			</div>
-
-		<?php endif; ?>
-
-		<?php if ($model->watchdog_type == 1) : ?>
+			</div>
+		</div>
+		<?php //endif; ?>
+		<div id="phone">
+		<?php //if ($model->watchdog_type == 2) : ?>
+				<h3>Recipients</h3>
+				<div style="border-top-style:solid;">
+				<p>If you want to enter multiple recipients here, separate them with comma (<b>,</b>)</p>
+				<p>Example: +38599009991, +38511001119</p>
 				<div class="row">
 		    <?php echo $form->labelEx($model, 'phone_number'); ?>
 		    <?php echo $form->textField($model, 'phone_number'); ?>
 		    <?php //echo $form->error($model,'phone_number');  ?>
 	    		</div>
-		<?php endif; ?>
+				</div>
+		<?php //endif; ?>
+		</div>
 
 
-
+<div style="border-top-style:solid;">
 		<?php if (CCaptcha::checkRequirements()): ?>
 		    		<div class="row">
 		    <?php echo $form->labelEx($model, 'verify_code'); ?>
@@ -138,6 +149,7 @@ $this->breadcrumbs = array(
 		    <?php echo CHtml::submitButton('Submit'); ?>
 				</div>
 		<?php endif; ?>
+</div>
 
 		<?php $this->endWidget(); ?>
 		<div class="corner topLeft"></div><div class="corner topRight"></div><div class="corner bottomLeft"></div><div class="corner bottomRight"></div>

@@ -26,34 +26,32 @@ $this->breadcrumbs = array(
 		<?php echo $form->errorSummary($model); ?>
 
 		<h3>Notification information</h3>
-		<div class="row">
+
+		<div style="border-top-style:solid;">
+		<div class="row compactRadioGroup">
 		    <?php echo $form->labelEx($model, 'notification_type'); ?>
-		    <div class="compactRadioGroup">
 			<?php
 			echo $form->radioButtonList($model, 'notification_type',
 				array(1 => 'SMS',
 				    2 => 'E-mail',
 				), array('separator' => "  ",
-			    'onChange' => 'reload(this.form)',
+			   // 'onChange' => 'reload(this.form)',
 			    'uncheckValue' => null,
 				// 'onChange'=>CHtml::ajax(array('type'=>'POST', 'url'=>CController::createUrl('dynamicRecipients'),'update'=>'#recipients', ))
 			));
 			?>
-		    </div>
 		    <?php echo $form->error($model, 'notification_type'); ?>
     		</div>
 
 
-    		<div class="row">
+    		<div class="row compactRadioGroup">
 		    <?php echo $form->labelEx($model, 'criteria_type'); ?>
-    		    <div class="compactRadioGroup">
 			<?php
 			echo $form->radioButtonList($model, 'criteria_type',
 				array(0 => 'above',
 				    1 => 'below',
 				), array('separator' => "  ", 'uncheckValue' => null));
 			?>
-		    </div>
 		    <?php echo $form->error($model, 'criteria_type'); ?>
     		</div>
 
@@ -69,8 +67,10 @@ $this->breadcrumbs = array(
 			echo $form->textField($model, 'resending_interval'); ?>
 		    <?php echo $form->error($model, 'resending_interval'); ?>
     		</div>
+		</div>
 
     		<h3>Sensor information</h3>
+		<div style="border-top-style:solid;">
     		<div class="row">
 		    <?php echo $form->labelEx($model, 'gsn_list'); ?>
 		    <?php
@@ -115,48 +115,45 @@ $this->breadcrumbs = array(
     		<div class="row">
 		    <?php echo $form->labelEx($model, 'measuring_unit_list'); ?>
 		    <?php
-			/*
-			  echo $form->dropDownList($model, 'measuring_unit_list', CHtml::listData(DiUnits::model()->
-			  with(array(
-			  'fSensorTypes' => array(
-			  'select' => false,
-			  'joinType' => 'INNER JOIN',
-			  'condition' => '"fSensorTypes".sensor_id=' . $model->sensor_id,
-			  ),
-			  ))->findAll(), 'unit_id', 'unit_name'),
-			  array('empty' => '--please select--',
-			  'options' => array($model->unit_id => array('selected' => true))
-			  )); */
-			//ovo ranije smo maknuli radi probe neceg pametnijeg
 			echo $form->dropDownList($model, 'measuring_unit_list', array(),
 				array(
 				    'empty' => 'Select',));
 		    ?>
 		    <?php echo $form->error($model, 'measuring_unit_list'); ?>
     		</div>
-
-    		<h3>Recipients</h3>
+		</div>
+		<div id="email">
 		<?php //$this->renderPartial('_notification_recipients', array('model'=> $model,'form'=>$form));   ?>
-		<?php if ($model->notification_type == 2) : ?>
-
+		<?php //if ($model->notification_type == 2) : ?>
+	    		<h3>Recipients</h3>
+			<div style="border-top-style:solid;">
+	    		<p>If you want to enter multiple recipients here, separate them with comma (<b>,</b>)</p>
+	    		<p>Example: your.email@company.com, your.college.email@companytwo.com</p>
 	    		<div class="row">
 		    <?php echo $form->labelEx($model, 'email'); ?>
 		    <?php echo $form->textField($model, 'email'); ?>
 		    <?php //echo $form->error($model,'email'); ?>
 			</div>
-
-		<?php endif; ?>
-
-		<?php if ($model->notification_type == 1) : ?>
+			</div>
+		</div>
+		<?php //endif; ?>
+		<div id="phone">
+		<?php //if ($model->notification_type == 1) : ?>
+				<h3>Recipients</h3>
+				<div style="border-top-style:solid;">
+				<p>If you want to enter multiple recipients here, separate them with comma (<b>,</b>)</p>
+				<p>Example: +38599009991, +38511001119</p>
 				<div class="row">
 		    <?php echo $form->labelEx($model, 'phone_number'); ?>
 		    <?php echo $form->textField($model, 'phone_number'); ?>
 		    <?php //echo $form->error($model,'phone_number');  ?>
 	    		</div>
-		<?php endif; ?>
+				</div>
+		<?php //endif; ?>
+		</div>
 
 
-
+<div style="border-top-style:solid;">
 		<?php if (CCaptcha::checkRequirements()): ?>
 		    		<div class="row">
 		    <?php echo $form->labelEx($model, 'verify_code'); ?>
@@ -172,6 +169,7 @@ $this->breadcrumbs = array(
 		    <?php echo CHtml::submitButton('Submit'); ?>
 				</div>
 		<?php endif; ?>
+</div>
 
 		<?php $this->endWidget(); ?>
 		<div class="corner topLeft"></div><div class="corner topRight"></div><div class="corner bottomLeft"></div><div class="corner bottomRight"></div>

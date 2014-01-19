@@ -16,49 +16,14 @@ $this->breadcrumbs = array(
 	<br/>
 
 	<?php
-	Yii::import('application.extensions.EGMap.*');
+	    $google = new googleMaps();
 
-	$gMap = new EGMap();
-	$gMap->setHeight(400);
-	$gMap->setWidth(550);
-
-	$gMap->zoom = 7;
-	$mapTypeControlOptions = array(
-	    'position' => EGMapControlPosition::LEFT_BOTTOM,
-	    'style' => EGMap::MAPTYPECONTROL_STYLE_DROPDOWN_MENU
-	);
-
-	$gMap->mapTypeControlOptions = $mapTypeControlOptions;
-//centar je zagreb
-	$gMap->setCenter(45.817, 15.983);
-
-	$all_user_sensors = Yii::app()->db->createCommand()
-			->selectDistinct('s.*')
-			->from('di_sensors s')
-			->join('di_gsn_privileges p', 'p.gsn_id=s.gsn_id')
-			->where('p.user_id=:id', array(':id' => Yii::app()->user->id))
-			->queryAll();
-
-	foreach ($all_user_sensors as $sensor) {
-	    $info_window_a = new EGMapInfoWindow('<div>Sensor name ' . $sensor['sensor_user_name'] . '</div>');
-	    // Create marker for every sensor user can see
-	    $icon = new EGMapMarkerImage("http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-128e4d/shapecolor-dark/shadow-1/border-white/symbolstyle-white/symbolshadowstyle-no/gradient-no/water.png");
-
-	    $icon->setSize(32, 37);
-	    $icon->setAnchor(16, 16.5);
-	    $icon->setOrigin(0, 0);
-
-	    $marker = new EGMapMarker($sensor['location_y'], $sensor['location_x'], array('title' => "Sensor " . $sensor['sensor_user_name'], 'icon' => $icon));
-
-	    $marker->addHtmlInfoWindow($info_window_a);
-	    $gMap->addMarker($marker);
-	}
-
-// enabling marker clusterer just for fun
-// to view it zoom-out the map
-//$gMap->enableMarkerClusterer(new EGMapMarkerClusterer());
-
-	$gMap->renderMap();
+	    if ($google->allSensorsWithReadingsMap()){
+	    //successful
+	    }
+	    else {
+		//unsuccessful
+	    }
 	?>
 
     </div>

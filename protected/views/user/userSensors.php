@@ -9,10 +9,10 @@ $this->breadcrumbs = array(
     <h2 class="title">Sensor main page</h2>
     <p class="posted">Lion development team</p>
     <div class="entry">
-	<p>You can see all sensors that are currently registered to one of the GSN servers you have privilege to work on.</p>
+	<p>You can see all sensors that are currently registered to all of the GSN servers you have privilege to work on.</p>
 
 	<?php
-	$rawData = Yii::app()->db->createCommand('SELECT s.*, g.gsn_name, g.gsn_url FROM di_sensors s JOIN di_gsn g on g.gsn_id = s.gsn_id JOIN di_gsn_privileges p on p.gsn_id = s.gsn_id and p.user_id = ' . Yii::app()->user->id . ' WHERE p.is_active = \'1\'')->queryAll();
+	$rawData = Yii::app()->db->createCommand('SELECT s.*, g.gsn_name, g.gsn_url FROM di_sensors s JOIN di_gsn g on g.gsn_id = s.gsn_id JOIN di_gsn_privileges p on p.gsn_id = s.gsn_id and p.user_id = ' . Yii::app()->user->id . ' WHERE p.is_active = \'1\' ORDER BY p.gsn_id, s.sensor_id')->queryAll();
 	// or using: $rawData=User::model()->findAll();
 	$dataProvider = new CArrayDataProvider($rawData, array(
 		    'keyField' => 'sensor_id',
@@ -31,6 +31,8 @@ $this->breadcrumbs = array(
 	$this->widget('zii.widgets.grid.CGridView', array(
 	    'id' => 'di-sensor-grid',
 	    'dataProvider' => $dataProvider,
+		'cssFile' => false,
+		'itemsCssClass' => 'table table-striped table-hover',
 	    //'filter'=>$model->model_view,
 	    //'selectableRows'=>2,
 	    'columns' => array(
@@ -53,6 +55,16 @@ $this->breadcrumbs = array(
 	     */
 	    ),
 	));
+	?>
+	<?php
+	    $google = new googleMaps();
+
+	    if ($google->allSensorsWithReadingsMap()){
+	    //successful
+	    }
+	    else {
+		//unsuccessful
+	    }
 	?>
 
     </div>

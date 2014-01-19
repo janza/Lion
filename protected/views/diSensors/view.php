@@ -25,20 +25,22 @@ $this->breadcrumbs = array(
 
 	<?php
 	$this->widget('zii.widgets.CDetailView', array(
+
+        'cssFile' => false,
 	    'data' => $model,
 	    'attributes' => array(
-		'sensor_id',
-		'sensor_name',
-		'sensor_user_name',
-		'gsn_id',
-		'sensor_type',
-		'location_x',
-		'location_y',
-		'date_activated_id',
-		'date_deactivated_id',
-		'is_active',
-		'is_dummy',
-		'is_real_sensor',
+    		'sensor_id',
+    		'sensor_name',
+    		'sensor_user_name',
+    		'gsn_id',
+    		'sensor_type',
+    		'location_x',
+    		'location_y',
+    		'date_activated_id',
+    		'date_deactivated_id',
+    		'is_active',
+    		'is_dummy',
+    		'is_real_sensor',
 	    ),
 	));
 	?>

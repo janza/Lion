@@ -120,4 +120,3 @@ $this->breadcrumbs = array(
 
     </div>
 </div>
-

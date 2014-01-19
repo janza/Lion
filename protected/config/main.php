@@ -15,6 +15,7 @@ return array(
         'application.components.*',
         'application.extensions.sftp.*',
         'application.extensions.restfullyii.components.*',
+	'application.extensions.yii-mail.YiiMailMessage',
     ),
     'modules' => array(
         // uncomment the following to enable the Gii tool
@@ -28,6 +29,34 @@ return array(
     ),
     // application components
     'components' => array(
+
+
+    // Default properties for some widgets
+    'widgetFactory' => array(
+        'widgets' => array(
+            'CGridView' => array(
+                'itemsCssClass' => 'table table-striped table-hover'
+            ),
+            'CLinkPager' => array(
+              'cssFile' => false
+            ),
+            'CMenu' => array(
+              'itemCssClass' => 'nav',
+            ),
+            'CDetailView' => array(
+              'htmlOptions' => array(
+                'class' => 'table details-view'
+              ),
+            )
+        ),
+    ),
+	'mail' => array(
+ 			'class' => 'ext.yii-mail.YiiMail',
+ 			'transportType' => 'php',
+ 			'viewPath' => 'application.views.mail',
+ 			'logging' => true,
+ 			'dryRun' => false
+ 		),
         'user' => array(
             // enable cookie-based authentication
             'allowAutoLogin' => true,

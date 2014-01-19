@@ -14,6 +14,7 @@ $this->breadcrumbs = array(
 	<p>If you need further managing, proceed with following links:</p>
 	<?php
 	echo "<ul>";
+	echo "<li>" . CHtml::link('User activity', array('prodUsers/userActivation')) . "</li>";
 	echo "<li>".  CHtml::link('<span>GSN privileges</span>', array('/admin/adminGsnPrivileges'))."</li>";
 	echo "<li>" . CHtml::link('Create user', array('prodUsers/create')) . "</li>";
 	echo "<li>" . CHtml::link('Manage users', array('prodUsers/admin')) . "</li>";
@@ -37,12 +38,9 @@ $this->breadcrumbs = array(
 		'group_id',
 		'ip_address',
 		'active',
-		'activation_code',
 		'created_on',
 		'last_login',
 		'username',
-		'forgotten_password_code',
-		'remember_code',
 		'phone',
 	    ),
 	));

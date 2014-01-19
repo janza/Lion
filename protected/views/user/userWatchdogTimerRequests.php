@@ -51,7 +51,7 @@ $this->breadcrumbs=array(
 		//'xml_name',
 		array('name' => 'critical_period', 'header' => 'Critical period'),
 		//'critical_value',
-		array('name' => 'resending_interval', 'header' => 'Resending interval'),
+		array('name' => 'minimal_delay_between_emails', 'header' => 'Resending interval'),
 		//'resending_interval',
 		array('name' => 'recipient', 'header' => 'Recipient'),
 		//'email',
@@ -71,4 +71,3 @@ $this->breadcrumbs=array(
 	?>
     </div>
 </div>
-

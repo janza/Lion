@@ -30,8 +30,20 @@ class SiteController extends Controller {
 	//$this->layout = 'temp_two_columns';
 	// renders the view file 'protected/views/site/index.php'
 	// using the default layout 'protected/views/layouts/main.php'
-	$this->render('index');
+	if (Yii::app()->user->isGuest){
+	    $this->render('index');
+	}
+	else if (Yii::app()->user->group ==1){
+	    $this->redirect(array('/admin/index')); //if we have administrator in the system
+	}
+	else if ($model->validate() && $model->login() && Yii::app()->user->group != 1){
+		$this->redirect(array('/user/userPersonal')); //if we have a normal person doing a log in
+	} else {
+    	$this->render('index');
+        }
+
     }
+
 
     /**
      * This is the action to handle external exceptions.
@@ -50,6 +62,7 @@ class SiteController extends Controller {
      */
     public function actionContact() {
 	$model = new ContactForm;
+	$model->message = "<b>If you have business inquiries or other questions, please fill out the following form to contact us. Thank you in advance.</b>";
 
 	if (isset($_POST['ContactForm'])) {
 	    $model->attributes = $_POST['ContactForm'];
@@ -57,7 +70,10 @@ class SiteController extends Controller {
 		$headers = "From: {$model->email}\r\nReply-To: {$model->email}";
 		mail(Yii::app()->params['adminEmail'], $model->subject, $model->body, $headers);
 		//Yii::app()->user->setFlash('contact','Thank you for contacting us. We will respond to you as soon as possible.');
-		$this->refresh();
+		$model->message = "<b>Your message has successfully been sent! Thank you for your interest, we will try to repond as soon as possible.<b>";
+		$model->body = "Do you have some more questions?";
+		$model->subject = "";
+		$this->render('contact', array('model' => $model));
 	    }
 	}
 	$this->render('contact', array('model' => $model));
@@ -82,9 +98,8 @@ class SiteController extends Controller {
 	    if ($model->validate() && $model->login() && Yii::app()->user->group == 1)
 	    //$this->redirect(Yii::app()->user->returnUrl);
 		$this->redirect(array('/admin/index')); //if we have administrator in the system
-	    else if ($model->validate() && $model->login() && Yii::app()->user->group != 1)
-		$this->redirect(array('/site/index')); //if we have a normal person doing a log in
-
+ else if ($model->validate() && $model->login() && Yii::app()->user->group != 1)
+		$this->redirect(array('/user/userPersonal')); //if we have a normal person doing a log in
 	}
 	// display the login form
 	$this->render('login', array('model' => $model));
@@ -107,6 +122,18 @@ class SiteController extends Controller {
 
 	if (isset($_POST['ProdUsers'])) {
 	    $model->attributes = $_POST['ProdUsers'];
+	    $isNew = ProdUsers::model()->findByAttributes(array('username' => $model->username));
+
+	    if (strcmp($model->password, $_POST['ProdUsers']['PasswordConfirm']) != 0) {
+		$model->passwdMessage = "You have provided different passwords, please try again!";
+		$this->render('registrationForm', array('model' => $model));
+	    }
+
+	    if (!empty($isNew)) {
+		$model->message = "This username is already taken, please choose another!";
+		$this->render('registrationForm', array('model' => $model));
+	    }
+
 	    if ($model->save())
 		$this->redirect(array('site/login'));
 	}

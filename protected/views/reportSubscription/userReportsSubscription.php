@@ -27,20 +27,23 @@ $this->breadcrumbs = array(
 	    JOIN di_gsn g ON s.gsn_id = g.gsn_id
 	    JOIN prod_users u ON u.user_id = n.user_id
 	    WHERE u.user_id = ' . Yii::app()->user->id . '
-	    order by type, report_id')->queryAll();
+	    order by type, g.gsn_name, s.sensor_name')->queryAll();
 
 	foreach ($rawData as $report)
 	{
 	    echo '<div class="roundedBox" id="type1">';
 	    //when we have a round frame, we can print what we wanted
-	    echo "Report type: ".$report['type'].'<br/>';
-	    echo "GSN server: ".$report['gsn_name'].'<br/>';
-	    echo "Sensor name: ".$report['sensor_user_name'].'<br/>';
-	    echo "Approved by administrator: ".(($report["is_active"]==1)?"Approved":"Waiting for approval").'<br/>';
-	    echo "Recipient: ".$report['email'].'<br/>';
-	    echo "Sending preferences: ".(($report["is_sending"])?"Sending":"Not sending").'<br/>';
-	    echo "Sending action: ".CHtml::link(($report["is_sending"])?"Stop":"Start",array('reportSubscription/userReportsSubscription', 'report_id'=>$report['report_id'],'type_int'=>$report['type_int'])).'<br/>';
-	    echo "Delete: ".CHtml::link('Delete',array('reportSubscription/userReportsSubscription', 'report_id'=>$report['report_id'],'type_int'=>$report['type_int'],'action'=>'delete')).'<br/>';
+	    echo "Report type: <b>".$report['type'].'</b><br/>';
+	    echo "GSN server: <b>".$report['gsn_name'].'</b><br/>';
+	    echo "Sensor name: <b>".$report['sensor_user_name'].'</b><br/>';
+	    echo "Approved by administrator: <b>".(($report["is_active"]==1)?"Approved":"Waiting for approval").'</b><br/>';
+	    echo "Recipient: <b>".$report['email'].'</b><br/>';
+
+	    if ($report["is_active"]==1){
+	    echo "Sending preferences: <b>".(($report["is_active"]==1)?(($report["is_sending"])?"Sending":"Not sending"):"Waiting for approval").'</b><br/>';
+	    echo "Sending action: <b>".(($report["is_active"]==1)?CHtml::link(($report["is_sending"])?"Stop":"Start",array('reportSubscription/userReportsSubscription', 'report_id'=>$report['report_id'],'type_int'=>$report['type_int'])):"Waiting for approval").'</b><br/>';
+	    }
+	    echo "Delete: <b>".CHtml::link('Delete',array('reportSubscription/userReportsSubscription', 'report_id'=>$report['report_id'],'type_int'=>$report['type_int'],'action'=>'delete')).'</b><br/>';
 	    echo '<div class="corner topLeft"></div><div class="corner topRight"></div><div class="corner bottomLeft"></div><div class="corner bottomRight"></div>';
 	    echo '</div>';
 	}

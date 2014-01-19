@@ -1,0 +1,10 @@
+.control_form {padding: 5px 5px 5px 5px;}
+
+.control_form input[type=text]                    { float:left; width: 40px; text-align: center; }
+.control_form form div                            { overflow: hidden;}
+.control_form .label_inline	{padding: 5px 0px 5px 0px; font-size: inherit; float:left; text-align: center; font-weight: normal;}
+.control_form .button                             {text-indent: -9999px; cursor: pointer; width: 20px; height: 20px; float: left; text-align: center; background: url("../images/buttons.png") no-repeat; }
+.control_form .dec                                { background-position: 0 -20px; }
+
+.control_form .button_temp                             { text-indent: -9999px; cursor: pointer; width: 20px; height: 20px; float: left; text-align: center; background: url("../images/buttons.png") no-repeat; }
+.control_form .dec                                { background-position: 0 -20px; }

@@ -30,7 +30,7 @@ class UserWatchdogTimer extends CFormModel
 	{
 		return array(
 			// all the fields are required
-			array('watchdog_type, delay,minimal_delay_between_emails,critical_period,sensor_list, gsn_list', 'required'),
+			array('watchdog_type,minimal_delay_between_emails,critical_period,sensor_list, gsn_list', 'required'),
 			// verifyCode needs to be entered correctly
 			array('verify_code', 'captcha', 'allowEmpty'=>!CCaptcha::checkRequirements()),
 		);

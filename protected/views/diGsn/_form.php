@@ -148,6 +148,12 @@
 	    <?php echo $form->error($model, 'notification_backup_folder'); ?>
 	</div>
 
+	<div class="row">
+	    <?php echo $form->labelEx($model, 'gsn_home_folder'); ?>
+	    <?php echo $form->textField($model, 'gsn_home_folder', array('size' => 30, 'maxlength' => 150)); ?>
+	    <?php echo $form->error($model, 'gsn_home_folder'); ?>
+	</div>
+
 	<div class="row buttons">
 	    <?php echo CHtml::submitButton($model->isNewRecord ? 'Create' : 'Save'); ?>
 	</div>

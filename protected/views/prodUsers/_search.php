@@ -46,11 +46,6 @@
 	</div>
 
 	<div class="row">
-		<?php echo $form->label($model,'activation_code'); ?>
-		<?php echo $form->textField($model,'activation_code',array('size'=>40,'maxlength'=>40)); ?>
-	</div>
-
-	<div class="row">
 		<?php echo $form->label($model,'created_on'); ?>
 		<?php echo $form->textField($model,'created_on'); ?>
 	</div>
@@ -63,11 +58,6 @@
 	<div class="row">
 		<?php echo $form->label($model,'username'); ?>
 		<?php echo $form->textField($model,'username',array('size'=>30,'maxlength'=>30)); ?>
-	</div>
-
-	<div class="row">
-		<?php echo $form->label($model,'remember_code'); ?>
-		<?php echo $form->textField($model,'remember_code',array('size'=>40,'maxlength'=>40)); ?>
 	</div>
 
 	<div class="row">

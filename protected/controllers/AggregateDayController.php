@@ -173,4 +173,121 @@ class AggregateDayController extends ERestController
 			Yii::app()->end();
 		}
 	}
+
+	private function createDateCondition($data) {
+		$startDate = $data['startDate'];
+		$endDate = $data['endDate'];
+
+		$condition = '(date_id >= '. $startDate.' AND date_id <= '. $endDate .') AND ';
+		$condition .= '(';
+
+		$count = count($data['units']);
+
+		// add units to condition
+		foreach ( $data['units'] as $key => $value ) {
+			$condition .= '(unit_id = ' . $value['unit_id'] . ' AND ';
+			$condition .= 'sensor_id = ' . $value['sensor_id'] . ')';
+
+			if ( $key == $count - 1 ) {
+				$condition .= ')';
+			} else {
+				$condition .= ' OR ';
+			}
+		}
+		return $condition;
+
+	}
+
+	private function createValCondition($data) {
+
+		$limit = $data['limit'];
+
+		$condition  = 'date_id IN (SELECT date_id FROM agg_day WHERE unit_id = ';
+		$condition .= $data['limit_unit_id'] . ' AND ';
+		$condition .= 'sensor_id = ' . $data['limit_sensor_id'] . ' AND ';
+		
+		if ( $data['compare'] == 'true' ) {
+			$condition .= 'max_value > ';
+		} else {
+			$condition .= 'min_value < ';
+		}
+		$condition .= $limit;
+
+		$condition .= ') AND (';
+
+		$count = count($data['units']);
+
+		// add units to condition
+		foreach ( $data['units'] as $key => $value ) {
+			$condition .= '(unit_id = ' . $value['unit_id'] . ' AND ';
+			$condition .= 'sensor_id = ' . $value['sensor_id'] . ')';
+
+			if ( $key == $count - 1 ) {
+				$condition .= ')';
+			} else {
+				$condition .= ' OR ';
+			}
+		}
+
+		return $condition;
+
+	}
+
+	public function doCustomRestPostSearch($data)
+	{
+
+		$retval = 'avg_value';
+		if (isset($data['limit'])) {
+			$condition = $this->createValCondition($data);
+			if ( $data['compare'] == 'true' ) {
+				$retval = 'max_value';
+			} else {
+				$retval = 'min_value';
+			}
+		} else {
+			$condition = $this->createDateCondition($data);
+		}
+
+		// create database criteria
+		$criteria = new CDbCriteria(array(
+			'select' => 'gsn_id, sensor_id, unit_id, date_id, reading_id, ' . $retval,
+			'distinct' => true,
+			'order' => 'date_id',
+			'condition' => $condition
+		));
+
+		$readings = AggregateDay::model()->findAll($criteria);
+
+		$this->renderJson(array(
+			'success' => true,
+			'message' => 'Records Retrieved Successfully',
+			'condition' => $condition,
+			'data' => $readings,
+		));
+	}
+
+
+
+	public function doCustomRestPostSearchVal($data)
+	{
+		
+		
+		// create database criteria
+		$criteria = new CDbCriteria(array(
+			'select' => 'gsn_id, sensor_id, unit_id, date_id, avg_value, reading_id',
+			'distinct' => true,
+			'order' => 'date_id',
+			'condition' => $condition
+		));
+
+		$readings = AggregateDay::model()->findAll($criteria);
+
+		$this->renderJson(array(
+			'success' => true,
+			'message' => 'Records Retrieved Successfully',
+			'test' => $condition,
+			'data' => $readings,
+		));
+	}
+
 }

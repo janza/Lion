@@ -3,13 +3,19 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="language" content="en" />
-
+        <!-- <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/tableDesign.css" /> -->
         <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/form.css" />
         <link href="http://fonts.googleapis.com/css?family=Oswald:400,700" rel="stylesheet" type="text/css" />
-        <link href="<?php echo Yii::app()->request->baseUrl; ?>/css/default.css" rel="stylesheet" type="text/css" media="all" />
-        <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/protected/javascript/jquery-1.7.1.min.js"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/protected/javascript/jquery.dropotron-1.0.js"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/protected/javascript/init.js"></script>
+        <link href="<?php echo Yii::app()->request->baseUrl; ?>/css/default_after_login.css" rel="stylesheet" type="text/css" media="all" />
+        <link href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="all" />
+        <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/incrementButton.css" />
+
+<!--        <script type="text/javascript" src="<?php //echo Yii::app()->request->baseUrl; ?>/protected/javascript/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="<?php //echo Yii::app()->request->baseUrl; ?>/protected/javascript/jquery.dropotron-1.0.js"></script>
+        <script type="text/javascript" src="<?php //echo Yii::app()->request->baseUrl; ?>/protected/javascript/init.js"></script>-->
+	<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js'></script>
+	<script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/protected/javascripts/incrementing.js"></script>
+	<script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl; ?>/protected/javascripts/refreshing_table.js"></script>
         <script language="JavaScript">
             function reload(form){
                 var not_type="not_selected";
@@ -27,7 +33,51 @@
 
                 self.location = '/lion/index.php/user/userNotifications?notification_type=' + not_type;
             }
+	    function reloadWatchdog(form){
+                var not_type="not_selected";
+
+                var radioButtons = document.getElementsByName('UserWatchdogTimer[watchdog_type]');
+
+                not_type = radioButtons.length;
+
+                for (var x = 0; x < radioButtons.length; x ++) {
+
+                    if (radioButtons[x].type=='radio' && radioButtons[x].checked) {
+                        not_type=radioButtons[x].value;
+                    }
+                }
+
+                self.location = '/lion/index.php/user/userWatchdogTimer?watchdog_type=' + not_type;
+            }
         </script>
+	<script type="text/javascript">
+	    var auto_refresh = setInterval(
+	    function ()
+	    {
+	    $('#managing').load(<?php echo '\'http://161.53.67.224'.Yii::app()->createUrl('systemManaging/managingLiveStream').'\'' ?>).fadeIn("slow");
+	    }, 3000); // refresh every 10000 milliseconds
+
+	    $(function() {
+		if($("#user_notifications_notification_type_0").is(":checked")){
+		    $('#phone').hide();
+		    $('#email').hide();
+		}else{
+		    $('#email').hide();
+		    $('#phone').hide();
+		}
+
+		$("[name='UserNotifications[notification_type]']").change(function(){
+		    if($(this).val()=="1"){
+			$('#phone').hide();
+			$('#email').show();
+		    }else {
+			$('#email').hide();
+			$('#phone').show();
+		    }
+
+		})
+	    });
+	</script>
         <title><?php echo CHtml::encode($this->pageTitle); ?></title>
     </head>
     <body>
@@ -36,9 +86,7 @@
 		<div id="logo">
 		    <h1><a href="#">Lion</a></h1>
 		    <p><?php if (!Yii::app()->user->isGuest) echo "Welcome " . Yii::app()->user->name; ?></p>
-		</div>
-	    </div>
-	</div>
+
 	<div id="menu-wrapper">
 	    <div id="menu-content">
 		<ul id="menu">
@@ -51,12 +99,10 @@
 			<li <?php if ($this->breadcrumbs[0] == "Home") echo 'class="first"' ?>><?php echo CHtml::link('<span>Home</span>', array('/site/index')); ?></li>
 			<li <?php if ($this->breadcrumbs[0] == "GSN") echo 'class="first"' ?>><?php echo CHtml::link('<span>GSN</span>', array('/user/userGsnList')); ?></li>
 			<li <?php if ($this->breadcrumbs[0] == "Sensors") echo 'class="first"' ?>><?php echo CHtml::link('<span>Sensors</span>', array('/user/userSensors')); ?></li>
-			<li <?php if ($this->breadcrumbs[0] == "Notification" || $this->breadcrumbs[0]=='Email notifications') echo 'class="first"' ?>><?php echo CHtml::link('<span>Notifications</span>', array('/user/userNotifications')); ?></li>
-
+			<li <?php if ($this->breadcrumbs[0] == "Notification" || $this->breadcrumbs[0]=='Notification requests') echo 'class="first"' ?>><?php echo CHtml::link('<span>Notifications</span>', array('/user/userNotifications')); ?></li>
+			<li <?php if ($this->breadcrumbs[0] == "GSN managing") echo 'class="first"' ?>><?php echo CHtml::link('<span>System</span>', array('/systemManaging/heatingControl')); ?></li>
 			<li <?php if ($this->breadcrumbs[0] == "Watchdog timers") echo 'class="first"' ?>><?php echo CHtml::link('<span>Watchdog</span>', array('/user/userWatchdogTimer')); ?></li>
-
-
-			<li <?php if ($this->breadcrumbs[0] == "Reports") echo 'class="first"' ?>><?php echo CHtml::link('<span>Reports</span>', array('/reportSubscription/userReportsMain')); ?></li>
+			<li <?php if ($this->breadcrumbs[0] == "Reports" || $this->breadcrumbs[0] =="New report subscription" || $this->breadcrumbs[0] =="Report subscriptions" || $this->breadcrumbs[0] =="Daily reports" || $this->breadcrumbs[0] =="Monthly reports") echo 'class="first"' ?>><?php echo CHtml::link('<span>Reports</span>', array('/reportSubscription/userReportsMain')); ?></li>
 			<li <?php if ($this->breadcrumbs[0] == "Graphs") echo 'class="first"' ?>><?php echo CHtml::link('<span>Graphs</span>', array('/graphs/graphs')); ?></li>
 			<li <?php if ($this->breadcrumbs[0] == "Contact")echo 'class="first"' ?>><?php echo CHtml::link('<span>Contact</span>', array('/site/contact')); ?></li>
 			<li <?php if ($this->breadcrumbs[0] == "Logout") echo 'class="first"' ?>><?php echo CHtml::link('<span>Logout</span>', array('/site/logout')); ?></li>
@@ -65,7 +111,9 @@
 			<?php endif; ?>
 		    <?php endif; ?>
 		</ul>
-	    </div>
+	    </div></div>
+        </div>
+    </div>
 	</div>
 	<div id="banner-wrapper">
 	    <div id="banner">
@@ -76,27 +124,19 @@
 		    'heightImage' => 257,
 		    'slides'=>array(
 			array(
-			    'image'=>array('src'=>Yii::app()->request->baseUrl.'/images/presentation_1.jpg'),
-			    'link'=>array('url'=>'mypage','htmlOptions'=>array())
+			    'image'=>array('src'=>Yii::app()->request->baseUrl.'/images/presentation_1.png'),
+			    'link'=>array('url'=>'index.php/site/index','htmlOptions'=>array())
 			),
 			array(
-			    'image'=>array('src'=>Yii::app()->request->baseUrl.'/images/presentation_2.jpg'),
+			    'image'=>array('src'=>Yii::app()->request->baseUrl.'/images/presentation_2.png'),
 			),
 			array(
-			    'image'=>array('src'=>Yii::app()->request->baseUrl.'/images/pics02.jpg'),
+			    'image'=>array('src'=>Yii::app()->request->baseUrl.'/images/presentation_3.png'),
 			)
 		  )));
 		?>
 		</div>
-<!--		<div class="image"><a href="#"><img src="<?php //echo Yii::app()->request->baseUrl; ?>/images/pics02.jpg" width="900" height="257" alt="" /></a></div>-->
 		<div class="border">
-		    <?php if (isset($this->breadcrumbs)): ?>
-			<?php
-			    $this->widget('zii.widgets.CBreadcrumbs', array(
-			    'links' => $this->breadcrumbs,
-			    ));
-			?><!-- breadcrumbs -->
-		    <?php endif ?>
 		</div>
 	    </div>
 	</div>
@@ -110,7 +150,7 @@
 	    <?php if ($this->breadcrumbs[0]=='Notification' || $this->breadcrumbs[0]=='Notification requests') : ?>
 	    <div id="sidebar">
 		<div>
-		    <h2 class="title">Sidemenu</h2>
+		    <h3 class="title">Options</h3>
 		    <p>
 			<ul>
 			    <li <?php if ($this->breadcrumbs[0] == "Notification") echo 'class="first"' ?>><?php echo CHtml::link('<span>New notification</span>', array('/user/userNotifications')); ?></li>
@@ -119,26 +159,22 @@
 		    </p>
 		</div>
 	    </div>
-
-
-
 	  <?php elseif ($this->breadcrumbs[0]=='Watchdog timers' || $this->breadcrumbs[0]=='Watchdog timer requests') : ?>
-		    <div id="sidebar">
-			<div>
-			    <h2 class="title">Sidemenu</h2>
-			    <p>
-				<ul>
-				    <li <?php if ($this->breadcrumbs[0] == "Watchdog timers") echo 'class="first"' ?>><?php echo CHtml::link('<span>New watchdog timer</span>', array('/user/userWatchdogTimer')); ?></li>
-				    <li <?php if ($this->breadcrumbs[0] == "Watchdog timer requests") echo 'class="first"' ?>><?php echo CHtml::link('<span>Watchdog timer requests</span>', array('/user/userWatchdogRequests')); ?></li>
-				</ul>
-			    </p>
-			</div>
-		    </div>
-
+	    <div id="sidebar">
+		<div>
+		    <h3 class="title">Options</h3>
+		    <p>
+			<ul>
+			    <li <?php if ($this->breadcrumbs[0] == "Watchdog timer") echo 'class="first"' ?>><?php echo CHtml::link('<span>New watchdog</span>', array('/user/userWatchdogTimer')); ?></li>
+			    <li <?php if ($this->breadcrumbs[0] == "Watchdog timer requests") echo 'class="first"' ?>><?php echo CHtml::link('<span>Watchdog requests</span>', array('/user/userWatchdogRequests')); ?></li>
+			</ul>
+		    </p>
+		</div>
+	    </div>
 	    <?php elseif ($this->breadcrumbs[0]=='New report subscription' || $this->breadcrumbs[0]=='Report subscriptions' || $this->breadcrumbs[0]=='Monthly reports' || $this->breadcrumbs[0]=='Daily reports' || $this->breadcrumbs[0]=='Reports') :?>
 	    <div id="sidebar">
 		<div>
-		    <h2 class="title">Sidemenu</h2>
+		    <h3 class="title">Options</h3>
 		    <p>
 			<li <?php if ($this->breadcrumbs[0] == "Reports") echo 'class="first"' ?>><?php echo CHtml::link('<span>Reports</span>', array('/reportSubscription/userReportsMain')); ?></li>
 			<li <?php if ($this->breadcrumbs[0] == "Daily reports") echo 'class="first"' ?>><?php echo CHtml::link('<span>Daily reports</span>', array('/reportSubscription/userReportsDaily')); ?></li>
@@ -147,98 +183,9 @@
 			<li <?php if ($this->breadcrumbs[0] == "Report subscriptions") echo 'class="first"' ?>><?php echo CHtml::link('<span>Report subscriptions</span>', array('/reportSubscription/userReportsSubscription')); ?></li>
 		    </p>
 		</div>
-		<div>
-		    <h2 class="title">Lion team</h2>
-		    <p>Lion was developed by students<br/><br/>Matija Renić<br/>Luka Postružin<br/><br/>under supervision of dr.sc.Mario Žagar</p>
-		</div>
-	    </div>
-	    <?php elseif ($this->breadcrumbs[0]=='Sensors') :?>
-		<div id="sidebar">
-		<div style="vertical-align:middle">
-		    <h2 class="title">Sensor map</h2>
-		<?php
-		    Yii::import('application.extensions.EGMap.*');
-
-		    $gMap = new EGMap();
-		    $gMap->setHeight(600);
-		    $gMap->setWidth(298);
-
-		    $gMap->zoom = 7;
-		    $mapTypeControlOptions = array(
-			'position' => EGMapControlPosition::LEFT_BOTTOM,
-			'style' => EGMap::MAPTYPECONTROL_STYLE_DROPDOWN_MENU
-		    );
-
-		    $gMap->mapTypeControlOptions = $mapTypeControlOptions;
-	    //centar je zagreb
-		    $gMap->setCenter(45.817, 15.983);
-
-		    $all_user_sensors = Yii::app()->db->createCommand()
-				    ->selectDistinct('s.*')
-				    ->from('di_sensors s')
-				    ->join('di_gsn_privileges p', 'p.gsn_id=s.gsn_id')
-				    ->where('p.user_id=:id', array(':id' => Yii::app()->user->id))
-				    ->queryAll();
-
-		    foreach ($all_user_sensors as $sensor) {
-			$last_measured_data = Yii::app()->db->createCommand(
-			    'SELECT 
-				u.unit_name
-			     ,	r.value
-			     ,	r.time_of_the_reading
-			     FROM
-			     (
-			     SELECT z.*, row_number() over (partition by z.sensor_id, z.unit_id order by time_of_the_reading desc) as rang
-			     FROM
-			     (
-				SELECT *
-				FROM l_readings
-			      ) z
-			      ) r
-			      JOIN di_sensors s ON r.sensor_id = s.sensor_id
-			      JOIN di_units u ON r.unit_id = u.unit_id
-			      WHERE 
-				1 = 1
-			      and r.rang = 1
-			      and s.sensor_id = '.$sensor['sensor_id']
-			)->queryAll();
-			$data = "";
-			foreach ($last_measured_data as $measured_data){
-			    $data .= "<br/>".$measured_data['unit_name'].": ".$measured_data['value'].", at ".$measured_data['time_of_the_reading'];
-			}
-
-			$info_window_a = new EGMapInfoWindow('<div>Sensor name ' . $sensor['sensor_user_name'] .$data .'</div>');
-			// Create marker for every sensor user can see
-			$icon = new EGMapMarkerImage("http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-128e4d/shapecolor-dark/shadow-1/border-white/symbolstyle-white/symbolshadowstyle-no/gradient-no/water.png");
-
-			$icon->setSize(32, 37);
-			$icon->setAnchor(16, 16.5);
-			$icon->setOrigin(0, 0);
-
-			$marker = new EGMapMarker($sensor['location_y'], $sensor['location_x'], array('title' => "Sensor " . $sensor['sensor_user_name'], 'icon' => $icon));
-
-			$marker->addHtmlInfoWindow($info_window_a);
-			$gMap->addMarker($marker);
-		    }
-
-	    // enabling marker clusterer just for fun
-	    // to view it zoom-out the map
-	    //$gMap->enableMarkerClusterer(new EGMapMarkerClusterer());
-
-		    $gMap->renderMap();
-		?>
-		</div>
 	    </div>
 		<?php else: ?>
 	    <div id="sidebar">
-		<div>
-		    <h2 class="title">About Lion</h2>
-		    <p>Lion is a project developed under Faculty of Electrical Engineering and Computing. It collects data from all around the world and provides user interface for managing all data sources and actions.</p>
-		</div>
-		<div>
-		    <h2 class="title">Lion team</h2>
-		    <p>Lion was developed by students<br/><br/>Matija Renić<br/>Luka Postružin<br/><br/>under supervision of dr.sc.Mario Žagar</p>
-		</div>
 	    </div>
 	    <?php endif;?>
 	</div>
@@ -250,26 +197,16 @@
 		<div id="column1">
 		    <div class="box1">
 			<h2>What is GSN?</h2>
-			<p>GSN stands for Global sensor networks project. Basically it is a web server that collects various data from multiple sources.</p>
-		    </div>
-		    <div class="box2">
-			<h2>What is RASIP?</h2>
-			<p><a href ="http://www.fer.unizg.hr/rasip/onama">RASIP</a> is a department on FER. It holds many open source courses and  a course about distributed software development.</p>
+			<p><a href ="http://sourceforge.net/apps/trac/gsn/">GSN</a> stands for Global sensor networks project. Basically it is a web server that collects various data from multiple sources.</p>
 		    </div>
 		</div>
-		<div id="column2">
-		    <div class="box3">
-			<h2>What is FER?</h2>
-			<p><a href ="http://www.fer.unizg.hr">FER</a> is a faculty from Zagreb, Croatia. It is a part of University of Zagreb.</p>
-		    </div>
-		</div>
+
 	    </div>
 	    <div class="bgbtm"></div>
 	</div>
         <div id="footer">
-            <p>Copyright &copy; <?php echo date('Y'); ?> by FER.</p>
+            <p>Copyright &copy; <?php echo date('Y'); ?> by FER, University of Zagreb.</p>
             <p>All Rights Reserved.</p>
-            <p>Matija Renić, Luka Postružin.</p>
         </div><!-- footer -->
     </body>
 </html>

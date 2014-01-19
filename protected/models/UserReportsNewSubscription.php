@@ -8,6 +8,8 @@ class UserReportsNewSubscription extends CFormModel {
     public $successful;
     public $newSubscription;
 
+    public $message;
+
 
     public $gsn_id;
     public $sensor_id;

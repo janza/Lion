@@ -84,7 +84,7 @@ class ProdSmsWatchdogTimer extends CActiveRecord
 
                             $sftp_obj->chdir($gsn_row['notification_folder']);
                             $sftp_obj->sendFile($returned_xml, $this->xml_name . ".xml");
-                            $body .= "\nNotification has been successfully deployed on the given location!\nNotification ID: " . $this->notification_id;
+                            $body .= "\nNotification has been successfully deployed on the given location!\nNotification ID: " . $this->watchdog_id;
                         } catch (Exception $er) {
                             $body .= "\nNotification has not been successfully deployed on the given location!\nError message: " . $er->getMessage();
                         }
@@ -97,7 +97,7 @@ class ProdSmsWatchdogTimer extends CActiveRecord
 
                             $sftp_obj->chdir($gsn_row['notification_backup_folder']);
                             $sftp_obj->sendFile($returned_xml, $this->xml_name . "Monitor.xml");
-                            $body .= "\nNotification backup has been successfully deployed on the given location!\nNotification ID: " . $this->notification_id;
+                            $body .= "\nNotification backup has been successfully deployed on the given location!\nNotification ID: " . $this->watchdog_id;
                         } catch (Exception $er) {
                             $body .= "\nNotification backup has not been successfully deployed on the given location!\nError message: " . $er->getMessage();
                         }
@@ -106,13 +106,13 @@ class ProdSmsWatchdogTimer extends CActiveRecord
                     }
                 }
                 else
-                    $body = $body . "Something went wrong when acquiring data for the GSN!\nNotification ID: " . $this->notification_id;
+                    $body = $body . "Something went wrong when acquiring data for the GSN!\nNotification ID: " . $this->watchdog_id;
             }
             else
                 $body = $body . "\nFor some reason XML file was not saved properly in the variable and program did not stop!Exit command does not work properly!\n";
             $body .= "\n\nNotification transfering process finished! Time: " . date('Y-m-d H:i:s');
 
-            mail("hyracoidea@gmail.com", $subject, $body, $headers);
+            mail("leonard.beus@fer.hr", $subject, $body, $headers);
         }
 
         return parent::beforeSave();
@@ -126,7 +126,7 @@ class ProdSmsWatchdogTimer extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('time_watchdog_asked, time_watchdog_approved, sensor_id, user_id', 'numerical', 'integerOnly'=>true),
+			array('gsn_id, sensor_id, user_id', 'numerical', 'integerOnly'=>true),
 			array('is_active', 'length', 'max'=>1),
 			array('sensor_name', 'length', 'max'=>40),
 			array('phone', 'length', 'max'=>100),
@@ -134,7 +134,7 @@ class ProdSmsWatchdogTimer extends CActiveRecord
 			array('critical_period, period_script, minimal_delay_between_emails', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('watchdog_id, time_watchdog_asked, time_watchdog_approved, is_active, sensor_id, user_id, sensor_name, phone, xml_name, critical_period, period_script, minimal_delay_between_emails', 'safe', 'on'=>'search'),
+			array('watchdog_id, time_watchdog_asked, time_watchdog_approved, is_active, sensor_id,gsn_id, user_id, sensor_name, phone, xml_name, critical_period, period_script, minimal_delay_between_emails', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -205,13 +205,13 @@ class ProdSmsWatchdogTimer extends CActiveRecord
         $sms_notification = ProdSmsWatchdogTimer::model()->findByAttributes(array('watchdog_id' => $id));
 
         $sensor_data = new DiSensors();
-        $sensor_data = DiSensors::model()->findByAttributes(array('sensor_id' => $email_notification['sensor_id']));
+        $sensor_data = DiSensors::model()->findByAttributes(array('sensor_id' => $sms_notification['sensor_id']));
 
         $gsn_data = new DiGsn();
         $gsn_data = DiGsn::model()->findByAttributes(array('gsn_id' => $sensor_data['gsn_id']));
 
         $user_data = new ProdUsers();
-        $user_data = ProdUsers::model()->findByAttributes(array('user_id' => $email_notification['user_id']));
+        $user_data = ProdUsers::model()->findByAttributes(array('user_id' => $sms_notification['user_id']));
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
                 '<virtual-sensor name="' . $sms_notification['xml_name'].'" priority="10">' . "\n" .
@@ -237,11 +237,11 @@ class ProdSmsWatchdogTimer extends CActiveRecord
                 ' ' . "\n" .
                 '					 if (notificationState == 0){ '. "\n" .
                 '    	             	updateNotificationVSXMLState(filePath, 1); '. "\n" .
-                '                       smsContent=\'Korisnice '.$user_data['first_name'].' '.$user_data['last_name'].',\n nadzor senzora \' + sensorName + \' je ponovno ukljucen!!!\'; '."\n".
+                '                       smsContent=\'Watchdog for sensor \' + sensorName + \' on server '.$gsn_data['gsn_name'].' is activated!\'; '."\n".
                 '                       sendSMS(recipients, smsContent); '. "\n" .
                 '                    }else if (notificationState == 2){  '."\n".
                 '    	                updateNotificationVSXMLState(filePath, 1); '."\n".
-                '                       smsContent=\'Korisnice '.$user_data['first_name'].' '.$user_data['last_name'].',\n senzor \' + sensorName + \' je proradio!!!\'; '."\n".
+                '                       smsContent=\'\\nSensor \' + sensorName + \' on server '.$gsn_data['gsn_name'].' started receiving readings!!!\'; '."\n".
                 '                       sendSMS(recipients, smsContent); '."\n".
                 '                    }]]></param>' . "\n" .
                 '      <param name="sensor-name">'.$sensor_data['sensor_name'].'</param>'. "\n" .
@@ -258,21 +258,18 @@ class ProdSmsWatchdogTimer extends CActiveRecord
                 '                    }'."\n".
                 '                    else {'."\n".
                 '                          def timeDifference = currentTime - lastProcessedTime;'."\n".
-                '                          def timeDifferenceMinutes = timeDifference/60000;'."\n".         
-                '                          def timeDifferenceSecunds = timeDifference%60000;'."\n".
-                '                          def criticalPeriodMinutes = criticalPeriod/60000;'."\n".
-                '                          def criticalPeriodSeconds = criticalPeriod%60000;'."\n".
+                '                          def criticalPeriodMinutes = (int)(criticalPeriod/60000);'."\n".
+                '                          def criticalPeriodSeconds = (int)(criticalPeriod- criticalPeriodMinutes*60000)/1000;'."\n".
                 '                          if (timeDifference >= criticalPeriod) {'."\n".
                 '        	                      switch(notificationState){'."\n".
                 '        			                  case 0: break;'."\n".      			
                 '        			                  case 1: '."\n".
-                '                                               smsContent = \'Korisnice '.$user_data['first_name'].' '.$user_data['last_name'].',\\n senzor \' + sensorName + \' je prestao primati ocitanja!!!\\nOve obavijesti sustav salje ukoliko osjetilo nije primilo ocitanje barem \' +criticalPeriodMinutes + \' min\' + criticalPeriodSeconds + \' s !\';'."\n". 
+                '                                               smsContent =\'\\nSensor \' + sensorName +  \' on server '. $gsn_data['gsn_name'].' stopped receiving readings!!!\\nThis warning messages system sends if sensor has not received reading at least \' +criticalPeriodMinutes + \' min  \' + criticalPeriodSeconds + \' s !\';'."\n".                    								 
 				'												sendSMS(recipients, smsContent);'."\n".
-				'												updateNotificationVSXMLState(filePath, 2);'."\n".
-				'												updateNotificationVSXMLErrorMessageTime(filePath, currentTime);'."\n".
+				'												updateNotificationVSXMLErrorMessageTimeAndNotificationState(filePath, currentTime,2);'."\n".
 				'												break;'."\n".	
                 '            		                  case 2: '."\n".
-				'                                             smsContent = \'Korisnice '.$user_data['first_name'].' '.$user_data['last_name'].',\\n senzor \' + sensorName + \' je prestao primati ocitanja!!!\\nOve obavijesti sustav salje ukoliko osjetilo nije primilo ocitanje barem \' +criticalPeriodMinutes + \'min\' + criticalPeriodSeconds + \' s !\\nObavijesti mozete iskljuciti na linku http://www.gsn.com?watchdog_id='.$id.'\';'."\n". 
+				'                                             smsContent = \'\\nSensor \' + sensorName + \' on server '.$gsn_data['gsn_name'].' stopped receiving readings!!!\\nThis warning messages system sends if sensor has not received reading at least \' +criticalPeriodMinutes + \' min  \' + criticalPeriodSeconds + \' s !\\n\\nTo disable this warning messages go to http://161.53.67.224/lion/index.php/webService/WatchdogDisableService?watchdog_id='.$id.'&type=SMS\';'."\n". 
                 '            				                  if((currentTime-lastErrorMessageTime) >= delay ){'."\n".
                 '                                               sendSMS(recipients, smsContent);'."\n".
                 '                                               updateNotificationVSXMLErrorMessageTime(filePath, currentTime);'."\n".
@@ -284,7 +281,7 @@ class ProdSmsWatchdogTimer extends CActiveRecord
                 '    </init-params>' . "\n" .
                 '    <output-structure />' . "\n" .
                 '  </processing-class>' . "\n" .
-                '  <description>                   </description>' . "\n" .
+                '  <description>Watchdog for sensor '.$sensor_data['sensor_name'].'</description>' . "\n" .
                 '  <addressing />' . "\n" .
                 '  <storage history-size="1" />' . "\n" .
                 '  <streams>' . "\n" .
@@ -300,8 +297,5 @@ class ProdSmsWatchdogTimer extends CActiveRecord
                 '  </streams>' . "\n" .
                 '</virtual-sensor>';
         return $xml;
-    }
-	
-	
-	
+    }	
 }

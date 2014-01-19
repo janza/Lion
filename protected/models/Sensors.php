@@ -33,10 +33,6 @@
 class Sensors extends CActiveRecord
 {
 
-
-	public $testis = 'hehe';
-
-
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -85,6 +81,7 @@ class Sensors extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
 			'sensorTypes' => array(self::HAS_MANY, 'SensorType', 'sensor_id'),
+			'diGsn' => array(self::HAS_ONE, 'DiGsn', array('gsn_id'=>'gsn_id')),
 			'units'=>array(self::HAS_MANY,'Units',array('unit_id'=>'unit_id'),'through'=>'sensorTypes'),
 		);
 	}

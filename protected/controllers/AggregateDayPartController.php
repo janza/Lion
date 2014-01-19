@@ -173,4 +173,56 @@ class AggregateDayPartController extends ERestController
 			Yii::app()->end();
 		}
 	}
+
+		public function doCustomRestPostSearch($data)
+	{
+
+		$startPart = $data['startPart'];
+		$endPart = $data['endPart'];
+		$startDate = $data['startDate'];
+		$endDate = $data['endDate'];
+
+		$condition = '((day_part_id >= ' . $startPart . ' AND ';
+		$condition .= 'date_id = ' . $startDate . ') OR (';
+		$condition .= 'day_part_id <= ' . $endPart . ' AND ';
+		$condition .= 'date_id = ' . $endDate . ') OR ';
+		$condition .= '(date_id > '. $startDate.' AND date_id < '. $endDate .')) AND ';
+		$condition .= '(';
+
+
+		$count = count($data['units']);
+
+		foreach ( $data['units'] as $key => $value ) {
+
+			$condition .= '(unit_id = ' . $value['unit_id'] . ' AND ';
+			$condition .= 'sensor_id = ' . $value['sensor_id'] . ')';
+
+			if ( $key == $count - 1 ) {
+				$condition .= ')';
+			} else {
+				$condition .= ' OR ';
+			}
+
+		}
+
+		$criteria = new CDbCriteria(array(
+			'select' => 'gsn_id, sensor_id, unit_id, date_id, day_part_id, avg_value, reading_id',
+			'distinct' => true,
+			'order' => 'date_id,day_part_id',
+			'condition' => $condition
+		));
+
+
+		$readings = AggregateDayPart::model()->findAll($criteria);
+
+
+		$this->renderJson(array(
+			'success' => true,
+			'message' => 'Records Retrieved Successfully',
+			'test' => $condition,
+			'data' => $readings,
+		));
+
+	}
+
 }

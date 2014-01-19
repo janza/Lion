@@ -26,6 +26,7 @@ $('.search-form form').submit(function(){
 	<p>If you need further managing, proceed with following links:</p>
 	<?php
 	echo "<ul>";
+	echo "<li>" . CHtml::link('User activity', array('prodUsers/userActivation')) . "</li>";
 	echo "<li>".  CHtml::link('<span>GSN privileges</span>', array('/admin/adminGsnPrivileges'))."</li>";
 	echo "<li>" . CHtml::link('Create user', array('prodUsers/create')) . "</li>";
 	echo "<li>" . CHtml::link('List users', array('prodUsers/index')) . "</li>";

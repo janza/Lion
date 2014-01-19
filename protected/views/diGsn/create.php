@@ -1,7 +1,7 @@
 <?php
 $this->breadcrumbs = array(
     'Di Gsns' => array('diGsn/index'),
-    'Create',
+    'Create GSN server',
 );
 ?>
 
@@ -17,9 +17,6 @@ $this->breadcrumbs = array(
 	echo "<li>" . CHtml::link('List DiGsn', array('diGsn/index')) . "</li>";
 	echo "</ul>";
 	?>
-	<div class="roundedBox" id="type1">
 	    <?php echo $this->renderPartial('_form', array('model' => $model)); ?>
-	    <div class="corner topLeft"></div><div class="corner topRight"></div><div class="corner bottomLeft"></div><div class="corner bottomRight"></div>
-	</div>
     </div>
 </div>

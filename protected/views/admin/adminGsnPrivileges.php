@@ -10,17 +10,18 @@ $this->breadcrumbs = array(
     <h2 class="title">GSN privileges administration</h2>
     <p class="posted">Lion development team</p>
     <div class="entry">
-		<p>If you need further managing, proceed with following links:</p>
+	<p>If you need further managing, proceed with following links:</p>
 	<?php
 	echo "<ul>";
+	echo "<li>" . CHtml::link('User activity', array('prodUsers/userActivation')) . "</li>";
 	echo "<li>" . CHtml::link('Create user', array('prodUsers/create')) . "</li>";
 	echo "<li>" . CHtml::link('Manage users', array('prodUsers/admin')) . "</li>";
 	echo "<li>" . CHtml::link('List users', array('prodUsers/index')) . "</li>";
 	echo "</ul>";
 	?>
-		<p>You can enable or decline all user gsn privilege requests</p>
+	<p>You can enable or decline all user gsn privilege requests</p>
 	<?php
-	$rawData = Yii::app()->db->createCommand('SELECT g.*, u.username, u.first_name || \' \' || u.last_name as full_name, p.is_active as is_privilege_active, p.gsn_privilege_id FROM di_gsn g JOIN di_gsn_privileges p ON p.gsn_id = g.gsn_id JOIN prod_users u ON u.user_id = p.user_id')->queryAll();
+	$rawData = Yii::app()->db->createCommand('SELECT g.*, u.username, u.first_name || \' \' || u.last_name as full_name, p.is_active as is_privilege_active, p.gsn_privilege_id FROM di_gsn g JOIN di_gsn_privileges p ON p.gsn_id = g.gsn_id JOIN prod_users u ON u.user_id = p.user_id ORDER BY p.user_id, g.gsn_id')->queryAll();
 	// or using: $rawData=User::model()->findAll();
 	$dataProvider = new CArrayDataProvider($rawData, array(
 		    'keyField' => 'gsn_privilege_id',

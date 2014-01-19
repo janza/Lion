@@ -64,7 +64,7 @@ class AggregateDay extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'date' => array(self::BELONGS_TO, 'DiDays', 'date_id'),
+			'date' => array(self::BELONGS_TO, 'DiDays', array('date_id'=>'date_id')),
 			'gsn' => array(self::BELONGS_TO, 'DiGsn', 'gsn_id'),
 			'sensor' => array(self::BELONGS_TO, 'DiSensors', 'sensor_id'),
 			'unit' => array(self::BELONGS_TO, 'DiUnits', 'unit_id'),

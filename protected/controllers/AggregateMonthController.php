@@ -61,7 +61,7 @@ class AggregateMonthController extends ERestController
 	 */
 	public function actionCreate()
 	{
-		$model=new AggregateMonth;
+		$model=new AggMonthDayPart;
 
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
@@ -127,7 +127,7 @@ class AggregateMonthController extends ERestController
 	 */
 	public function actionIndex()
 	{
-		$dataProvider=new CActiveDataProvider('AggregateMonth');
+		$dataProvider=new CActiveDataProvider('AggMonthDayPart');
 		$this->render('index',array(
 			'dataProvider'=>$dataProvider,
 		));
@@ -138,7 +138,7 @@ class AggregateMonthController extends ERestController
 	 */
 	public function actionAdmin()
 	{
-		$model=new AggregateMonth('search');
+		$model=new AggMonthDayPart('search');
 		$model->unsetAttributes();  // clear any default values
 		if(isset($_GET['AggregateMonth']))
 			$model->attributes=$_GET['AggregateMonth'];
@@ -155,7 +155,7 @@ class AggregateMonthController extends ERestController
 	 */
 	public function loadModel($id)
 	{
-		$model=AggregateMonth::model()->findByPk($id);
+		$model=AggMonthDayPart::model()->findByPk($id);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;

@@ -36,152 +36,160 @@ class ProdEmailNotifications extends CActiveRecord {
      * @return ProdEmailNotifications the static model class
      */
     public static function model($className=__CLASS__) {
-        return parent::model($className);
+	return parent::model($className);
     }
 
     /**
      * @return string the associated database table name
      */
     public function tableName() {
-        return 'prod_email_notifications';
+	return 'prod_email_notifications';
     }
 
     public function beforeSave() {
-        $headers = "From: " . Yii::app()->params['adminEmail'] . "\r\nReply-To: " . Yii::app()->params['adminEmail'];
-        $subject = "Email notification before save";
-        $body = "";
-        $body .= "\n\nNotification transfering process started! Time: " . date('Y-m-d H:i:s');
-        if ($this->isNewRecord) {
-            $this->time_notification_asked = new CDbExpression('NOW()');
-            $this->is_active = '0';
-            //$body = "New notification has been saved!";
-        } else {
+	$headers = "From: " . Yii::app()->params['adminEmail'] . "\r\nReply-To: " . Yii::app()->params['adminEmail'];
+	$subject = "Email notification before save";
+	$body = "";
+	$body .= "\n\nNotification transfering process started! Time: " . date('Y-m-d H:i:s');
+	if ($this->isNewRecord) {
+	    $this->time_notification_asked = new CDbExpression('NOW()');
+	    $this->is_active = '0';
+	    //$body = "New notification has been saved!";
+	} else {
 //            if ($this->is_active == '0')
 //                $this->is_active = '1';
 //            else
 //                $this->is_active = '0';
-        }
+	}
 
-        //if this notification request is turned on
-        if ($this->is_active == '1') {
-            $this->time_notification_approved = new CDbExpression('NOW()');
+	//if this notification request is turned on
+	if ($this->is_active == '1') {
+	    $this->time_notification_approved = new CDbExpression('NOW()');
 
-            $returned_xml = null;
-            try {
-                if ($this->criteria_type==1)
-                    $returned_xml = utf8_encode($this->email_xml_file_below($this->notification_id));
-                else if ($this->criteria_type==0)
-                    $returned_xml = utf8_encode($this->email_xml_file_above($this->notification_id));
-            } catch (Exception $e) {
-                $body = $body . "\nThere was an error when creating XML file!\n No changes have been made!\n";
-                exit(-1);
-            }
+	    $returned_xml = null;
+	    try {
+		if ($this->criteria_type == 1)
+		    $returned_xml = utf8_encode($this->email_xml_file_below($this->notification_id));
+		else if ($this->criteria_type == 0)
+		    $returned_xml = utf8_encode($this->email_xml_file_above($this->notification_id));
+	    } catch (Exception $e) {
+		$body = $body . "\nThere was an error when creating XML file!\n No changes have been made!\n";
+		exit(-1);
+	    }
 
-            if ($returned_xml != null) {
-                $gsn_row = DiGsn::model()->find(array('select' => 'gsn_name, gsn_ip, notification_folder, notification_backup_folder, sftp_username, sftp_password', 'condition' => 'gsn_id=' . $this->gsn_id));
+	    if ($returned_xml != null) {
+		$gsn_row = DiGsn::model()->find(array('select' => 'gsn_name, gsn_ip, notification_folder, notification_backup_folder, sftp_username, sftp_password', 'condition' => 'gsn_id=' . $this->gsn_id));
 
-                if ($gsn_row != null) {
-                    try {
-                        $sftp_obj = new SftpComponent($gsn_row['gsn_ip'], $gsn_row['sftp_username'], $gsn_row['sftp_password']);
-                        $sftp_obj->connect();
-                        $body.="\nNotification folder: " . $gsn_row['notification_folder'] . "\nNotification backup folder: " . $gsn_row['notification_backup_folder'];
-                        try {
-                            if ($sftp_obj->isDir($gsn_row['notification_folder']))
-                                $body.="\nNotification folder exists!\n";
-                            else
-                                $body.="\nNotification folder does not exist!\n";
+		if ($gsn_row != null) {
+		    try {
+			if (strcmp($gsn_row['gsn_ip'], "127.0.0.1") == 0) {
+			    $file_w = fopen($gsn_row['notification_folder'] . "\\" . $this->xml_name . ".xml", 'w');
+			    fwrite($file_w, $returned_xml);
+
+			    $file_w_backup = fopen($gsn_row['notification_backup_folder'] . "\\" . $this->xml_name . ".xml", 'w');
+			    fwrite($file_w_backup, $returned_xml);
+			} else {
+			    $sftp_obj = new SftpComponent($gsn_row['gsn_ip'], $gsn_row['sftp_username'], $gsn_row['sftp_password']);
+			    $sftp_obj->connect();
+			    $body.="\nNotification folder: " . $gsn_row['notification_folder'] . "\nNotification backup folder: " . $gsn_row['notification_backup_folder'];
+			    try {
+				if ($sftp_obj->isDir($gsn_row['notification_folder']))
+				    $body.="\nNotification folder exists!\n";
+				else
+				    $body.="\nNotification folder does not exist!\n";
 
 
-                            $sftp_obj->chdir($gsn_row['notification_folder']);
-                            $sftp_obj->sendFile($returned_xml, $this->xml_name . ".xml");
-                            $body .= "\nNotification has been successfully deployed on the given location!\nNotification ID: " . $this->notification_id;
-                        } catch (Exception $er) {
-                            $body .= "\nNotification has not been successfully deployed on the given location!\nError message: " . $er->getMessage();
-                        }
+				$sftp_obj->chdir($gsn_row['notification_folder']);
+				$sftp_obj->sendFile($returned_xml, $this->xml_name . ".xml");
+				$body .= "\nNotification has been successfully deployed on the given location!\nNotification ID: " . $this->notification_id;
+			    } catch (Exception $er) {
+				$body .= "\nNotification has not been successfully deployed on the given location!\nError message: " . $er->getMessage();
+			    }
 
-                        try {
-                            if ($sftp_obj->isDir($gsn_row['notification_backup_folder']))
-                                $body.="\nNotification backup folder exists!\n";
-                            else
-                                $body.="\nNotification backup folder does not exist!\n";
+			    try {
+				if ($sftp_obj->isDir($gsn_row['notification_backup_folder']))
+				    $body.="\nNotification backup folder exists!\n";
+				else
+				    $body.="\nNotification backup folder does not exist!\n";
 
-                            $sftp_obj->chdir($gsn_row['notification_backup_folder']);
-                            $sftp_obj->sendFile($returned_xml, $this->xml_name . ".xml");
-                            $body .= "\nNotification backup has been successfully deployed on the given location!\nNotification ID: " . $this->notification_id;
-                        } catch (Exception $er) {
-                            $body .= "\nNotification backup has not been successfully deployed on the given location!\nError message: " . $er->getMessage();
-                        }
-                    } catch (Exception $e) {
-                        $body.="Something went wrong with the connection.\nError message: " . $e->getMessage();
-                    }
-                }
-                else
-                    $body = $body . "Something went wrong when acquiring data for the GSN!\nNotification ID: " . $this->notification_id;
-            }
-            else
-                $body = $body . "\nFor some reason XML file was not saved properly in the variable and program did not stop!Exit command does not work properly!\n";
-            $body .= "\n\nNotification transfering process finished! Time: " . date('Y-m-d H:i:s');
+				$sftp_obj->chdir($gsn_row['notification_backup_folder']);
+				$sftp_obj->sendFile($returned_xml, $this->xml_name . ".xml");
+				$body .= "\nNotification backup has been successfully deployed on the given location!\nNotification ID: " . $this->notification_id;
+			    } catch (Exception $er) {
+				$body .= "\nNotification backup has not been successfully deployed on the given location!\nError message: " . $er->getMessage();
+			    }
+			}
+		    } catch (Exception $e) {
+			$body.="Something went wrong with the connection.\nError message: " . $e->getMessage();
+		    }
+		}
+		else
+		    $body = $body . "Something went wrong when acquiring data for the GSN!\nNotification ID: " . $this->notification_id;
+	    }
+	    else
+		$body = $body . "\nFor some reason XML file was not saved properly in the variable and program did not stop!Exit command does not work properly!\n";
+	    $body .= "\n\nNotification transfering process finished! Time: " . date('Y-m-d H:i:s');
 
-            mail("hyracoidea@gmail.com", $subject, $body, $headers);
-        }
+	    mail("hyracoidea@gmail.com", $subject, $body, $headers);
+	}
 
-        return parent::beforeSave();
+	return parent::beforeSave();
     }
 
     /**
      * @return array validation rules for model attributes.
      */
     public function rules() {
-        // NOTE: you should only define rules for those attributes that
-        // will receive user inputs.
-        return array(
-            array('unit_id, sensor_id, prod_user_id, critical_value, resending_interval, criteria_type', 'numerical', 'integerOnly' => true),
-            array('is_active', 'length', 'max' => 1),
-            array('unit_name, unit_name_upper, sensor_name', 'length', 'max' => 40),
-            array('criteria_type_name', 'length', 'max' => 50),
-            array('xml_name, email', 'length', 'max' => 150),
-            // The following rule is used by search().
-            // Please remove those attributes that should not be searched.
-            array('notification_id, time_notification_asked, time_notification_approved, is_active, unit_id, sensor_id, prod_user_id, unit_name, unit_name_upper, sensor_name, xml_name, email, critical_value, resending_interval, criteria_type', 'safe', 'on' => 'search'),
-        );
+	// NOTE: you should only define rules for those attributes that
+	// will receive user inputs.
+	return array(
+	    array('unit_id, sensor_id, prod_user_id, critical_value, resending_interval, criteria_type', 'numerical', 'integerOnly' => true),
+	    array('is_active', 'length', 'max' => 1),
+	    array('unit_name, unit_name_upper, sensor_name', 'length', 'max' => 40),
+	    array('criteria_type_name', 'length', 'max' => 50),
+	    array('xml_name, email', 'length', 'max' => 150),
+	    // The following rule is used by search().
+	    // Please remove those attributes that should not be searched.
+	    array('notification_id, time_notification_asked, time_notification_approved, is_active, unit_id, sensor_id, prod_user_id, unit_name, unit_name_upper, sensor_name, xml_name, email, critical_value, resending_interval, criteria_type', 'safe', 'on' => 'search'),
+	);
     }
 
     /**
      * @return array relational rules.
      */
     public function relations() {
-        // NOTE: you may need to adjust the relation name and the related
-        // class name for the relations automatically generated below.
-        return array(
-            'prodUser' => array(self::BELONGS_TO, 'ProdUsers', 'prod_user_id'),
-            'sensor' => array(self::BELONGS_TO, 'DiSensors', 'sensor_id'),
-            'unit' => array(self::BELONGS_TO, 'DiUnits', 'unit_id'),
-        );
+	// NOTE: you may need to adjust the relation name and the related
+	// class name for the relations automatically generated below.
+	return array(
+	    'prodUser' => array(self::BELONGS_TO, 'ProdUsers', 'prod_user_id'),
+	    'sensor' => array(self::BELONGS_TO, 'DiSensors', 'sensor_id'),
+	    'unit' => array(self::BELONGS_TO, 'DiUnits', 'unit_id'),
+	);
     }
 
     /**
      * @return array customized attribute labels (name=>label)
      */
     public function attributeLabels() {
-        return array(
-            'notification_id' => 'Notification',
-            'time_notification_asked' => 'Time Notification Asked',
-            'time_notification_approved' => 'Time Notification Approved',
-            'is_active' => 'Is Active',
-            'email' => 'Email',
-            'unit_id' => 'Unit',
-            'sensor_id' => 'Sensor',
-            'prod_user_id' => 'Prod User',
-            'unit_name' => 'Unit Name',
-            'unit_name_upper' => 'Unit Name Upper',
-            'sensor_name' => 'Sensor Name',
-            'xml_name' => 'Xml Name',
-            'critical_value' => 'Critical Value',
-            'resending_interval' => 'Resending Interval',
-            'criteria_type' => 'Criteria Type',
-            'criteria_type_name' => 'Criteria Type Name',
-            'email' => 'Email'
-        );
+	return array(
+	    'notification_id' => 'Notification',
+	    'time_notification_asked' => 'Time Notification Asked',
+	    'time_notification_approved' => 'Time Notification Approved',
+	    'is_active' => 'Is Active',
+	    'email' => 'Email',
+	    'unit_id' => 'Unit',
+	    'sensor_id' => 'Sensor',
+	    'prod_user_id' => 'Prod User',
+	    'unit_name' => 'Unit Name',
+	    'unit_name_upper' => 'Unit Name Upper',
+	    'sensor_name' => 'Sensor Name',
+	    'xml_name' => 'Xml Name',
+	    'critical_value' => 'Critical Value',
+	    'resending_interval' => 'Resending Interval',
+	    'criteria_type' => 'Criteria Type',
+	    'criteria_type_name' => 'Criteria Type Name',
+	    'email' => 'Email'
+	);
     }
 
     /**
@@ -189,73 +197,74 @@ class ProdEmailNotifications extends CActiveRecord {
      * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
      */
     public function search() {
-        // Warning: Please modify the following code to remove attributes that
-        // should not be searched.
+	// Warning: Please modify the following code to remove attributes that
+	// should not be searched.
 
-        $criteria = new CDbCriteria;
+	$criteria = new CDbCriteria;
 
-        $criteria->compare('notification_id', $this->notification_id);
-        $criteria->compare('time_notification_asked', $this->time_notification_asked);
-        $criteria->compare('time_notification_approved', $this->time_notification_approved);
-        $criteria->compare('is_active', $this->is_active, true);
-        $criteria->compare('unit_id', $this->unit_id);
-        $criteria->compare('sensor_id', $this->sensor_id);
-        $criteria->compare('prod_user_id', $this->prod_user_id);
-        $criteria->compare('unit_name', $this->unit_name, true);
-        $criteria->compare('unit_name_upper', $this->unit_name_upper, true);
-        $criteria->compare('sensor_name', $this->sensor_name, true);
-        $criteria->compare('xml_name', $this->xml_name, true);
-        $criteria->compare('email', $this->email);
-        $criteria->compare('critical_value', $this->critical_value);
-        $criteria->compare('resending_interval', $this->resending_interval);
-        $criteria->compare('criteria_type', $this->criteria_type);
-        $criteria->compare('criteria_type_name', $this->criteria_type_name);
+	$criteria->compare('notification_id', $this->notification_id);
+	$criteria->compare('time_notification_asked', $this->time_notification_asked);
+	$criteria->compare('time_notification_approved', $this->time_notification_approved);
+	$criteria->compare('is_active', $this->is_active, true);
+	$criteria->compare('unit_id', $this->unit_id);
+	$criteria->compare('sensor_id', $this->sensor_id);
+	$criteria->compare('prod_user_id', $this->prod_user_id);
+	$criteria->compare('unit_name', $this->unit_name, true);
+	$criteria->compare('unit_name_upper', $this->unit_name_upper, true);
+	$criteria->compare('sensor_name', $this->sensor_name, true);
+	$criteria->compare('xml_name', $this->xml_name, true);
+	$criteria->compare('email', $this->email);
+	$criteria->compare('critical_value', $this->critical_value);
+	$criteria->compare('resending_interval', $this->resending_interval);
+	$criteria->compare('criteria_type', $this->criteria_type);
+	$criteria->compare('criteria_type_name', $this->criteria_type_name);
 
-        return new CActiveDataProvider($this, array(
-            'criteria' => $criteria,
-        ));
+	return new CActiveDataProvider($this, array(
+	    'criteria' => $criteria,
+	));
     }
 
     /**
      * Email notification generation for emails below critical level
      */
     public function email_xml_file_below($id) {
-        $email_notification = new ProdEmailNotifications;
-        $email_notification = ProdEmailNotifications::model()->findByAttributes(array('notification_id' => $id));
+	$email_notification = new ProdEmailNotifications;
+	$email_notification = ProdEmailNotifications::model()->findByAttributes(array('notification_id' => $id));
 
-        $sensor_data = new DiSensors();
-        $sensor_data = DiSensors::model()->findByAttributes(array('sensor_id' => $email_notification['sensor_id']));
+	$sensor_data = new DiSensors();
+	$sensor_data = DiSensors::model()->findByAttributes(array('sensor_id' => $email_notification['sensor_id']));
 
-        $gsn_data = new DiGsn();
-        $gsn_data = DiGsn::model()->findByAttributes(array('gsn_id' => $sensor_data['gsn_id']));
+	$gsn_data = new DiGsn();
+	$gsn_data = DiGsn::model()->findByAttributes(array('gsn_id' => $sensor_data['gsn_id']));
 
-        $user_data = new ProdUsers();
-        $user_data = ProdUsers::model()->findByAttributes(array('user_id' => $email_notification['prod_user_id']));
+	$user_data = new ProdUsers();
+	$user_data = ProdUsers::model()->findByAttributes(array('user_id' => $email_notification['prod_user_id']));
 
-        /*
-          $userName = $input['userName'];
+	/*
+	  $userName = $input['userName'];
 
-          $display_name = $input['display_name'];
-          $sensorName = $input['sensorName'];
-          $measuringUnit = $input['measuringUnit'];
-          $criticalValue = $input['criticalValue'];
-          $resendingInterval = $input['resendingInterval'];
+	  $display_name = $input['display_name'];
+	  $sensorName = $input['sensorName'];
+	  $measuringUnit = $input['measuringUnit'];
+	  $criticalValue = $input['criticalValue'];
+	  $resendingInterval = $input['resendingInterval'];
 
-          $measuringUnitUPP = strtoupper($measuringUnit);
-         */
+	  $measuringUnitUPP = strtoupper($measuringUnit);
+	 */
 
-        $sensor_information = "Sensor @ " . $gsn_data['gsn_name'] . " - " . $gsn_data['city'] . " " .
-                $gsn_data['state'] . ", latitude " . $sensor_data['location_y'] .
-                ", longitude " . $sensor_data['location_x'];
+	$sensor_information = "Sensor @ " . $gsn_data['gsn_name'] . " - " . $gsn_data['city'] . " " .
+		$gsn_data['state'] . ", latitude " . $sensor_data['location_y'] .
+		", longitude " . $sensor_data['location_x'];
 
 
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+	 $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
                 '<virtual-sensor name="' . $email_notification['xml_name'] . '" priority="10">' . "\n" .
                 '  <processing-class>' . "\n" .
                 '    <class-name>gsn.processor.ScriptletProcessor</class-name>' . "\n" .
                 '    <init-params>' . "\n" .
                 '      <param name="persistant">false</param>' . "\n" .
                 '      <param name="notification-state">0</param>' . "\n" .
+				'	   <param name="mail-state">0</param>' . "\n" .
                 '      <param name="scriptlet"><![CDATA[' . "\n" .
                 '                    //this is a start of a scriptlet' . "\n" .
                 '                    //data definition' . "\n" .
@@ -268,19 +277,29 @@ class ProdEmailNotifications extends CActiveRecord {
                 '' . "\n" .
                 '' . "\n" .
                 '                    def state = notificationState; //notification state variable is defined in scriptlet from init-params' . "\n" .
+				'					 def mail = mailState;' . "\n" .
                 '                    def nodePath ="streams/stream/query";' . "\n" .
-                '                    def EmailTitle ="";' . "\n" .
+                '                    def emailTitle ="";' . "\n" .
                 '                    def emailContent="";' . "\n" .
                 '                    def newQuery=""; ' . "\n" .
                 ' ' . "\n" .
                 '                    //end of data definition' . "\n" .
+				'					 if(mail == 1){' . "\n" .
+				'					 	if(state == 0){' . "\n" .
+				'							mail = 0;' . "\n" .
+				'							updateMailState(filePath, mail);' . "\n" .
+				'						}' . "\n" .
+				'					 	else{' . "\n" .
+				'							state = 2;' . "\n" .
+				'						}' . "\n" .
+				'					 }' . "\n" .
                 ' ' . "\n" .
                 '                    switch(state){' . "\n" .
                 ' ' . "\n" .
                 '                          case 0: def delayTime = TIMED + delay;' . "\n" .
                 '                                  newQuery = "select "+measuringUnit+", timed from source1 where (("+measuringUnit+"<"+criticalValue+") and (timed >" + delayTime + ")) or ("+measuringUnit+">="+criticalValue+")";' . "\n" .
                 '                                  emailTitle = "Warning!";' . "\n" .
-                '                                  emailContent = "Dear ' . $user_data['first_name'] . " ".$user_data['last_name'] . ',\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' dropped under "+criticalValue+".\nLast measured value is " + ' . $email_notification['unit_name_upper'] . ' + "!\n\n ' . $sensor_information . '";' . "\n" .
+                '                                  emailContent = "Dear user,\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' dropped under "+criticalValue+".\nLast measured value is " + ' . $email_notification['unit_name_upper'] . ' + "!\nDisable notification on: http://161.53.67.224/lion/index.php/webService/NotificationDisableService?notification_id='.$id.'&type=E-mail\n\n ' . $sensor_information . '";' . "\n" .
                 '                                  state++;' . "\n" .
                 '                                  break;' . "\n" .
                 '' . "\n" .
@@ -288,19 +307,33 @@ class ProdEmailNotifications extends CActiveRecord {
                 '                                          def delayTime = TIMED + delay;' . "\n" .
                 '                                          newQuery = "select "+measuringUnit+", timed from source1 where (("+measuringUnit+"<"+criticalValue+") and (timed >" + delayTime + ")) or ("+measuringUnit+">="+criticalValue+")";' . "\n" .
                 '                                          emailTitle = "Warning again";' . "\n" .
-                '                                          emailContent = "Dear ' .$user_data['first_name'] . " ".$user_data['last_name'] . ',\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' still under "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + ".\nDo something!\n\n ' . $sensor_information . '";' . "\n" .
+                '                                          emailContent = "Dear user,\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' still under "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + ".\nDo something!\nDisable notification on: http://161.53.67.224/lion/index.php/webService/NotificationDisableService?notification_id='.$id.'&type=E-mail\n\n ' . $sensor_information . '";' . "\n" .
                 '                                  }' . "\n" .
                 '                                  else{' . "\n" .
                 '                                       newQuery = "select "+measuringUnit+", timed from source1 where "+measuringUnit+"<"+criticalValue;' . "\n" .
                 '                                       emailTitle = "Everything OK";' . "\n" .
-                '                                       emailContent = "Dear ' .$user_data['first_name'] . " ".$user_data['last_name'] . ',\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' rised over "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + "!!!\nSensor readings are ok.\n\n ' . $sensor_information . '";' . "\n" .
+                '                                       emailContent = "Dear user,\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' rised over "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + "!!!\nSensor readings are ok.\n\n ' . $sensor_information . '";' . "\n" .
                 '                                       state=0;' . "\n" .
                 '' . "\n" .
                 '                                  }' . "\n" .
                 '                                  break;' . "\n" .
+				'						   case 2: if (' . $email_notification['unit_name_upper'] . '>=criticalValue){' . "\n" .
+				'										newQuery = "select "+measuringUnit+", timed from source1 where "+measuringUnit+"<"+criticalValue;' . "\n" .
+				'										emailTitle = "Everything OK";' . "\n" .
+				'										emailContent = "Dear user,\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' rised over "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + "!!!\nSensor readings are ok.\n\n ' .$sensor_information . '";' . "\n" .
+				'										state = 0;' . "\n" .
+				'										mail = 0;' . "\n" .
+				'										updateMailState(filePath,mail);' . "\n" .
+				'								   }' . "\n" .
+				'								   else{' . "\n" .
+				'										newQuery = "select "+measuringUnit+", timed from source1 where "+measuringUnit+">="+criticalValue;' . "\n" .
+				'								   }' . "\n" .
+				'								   break;' . "\n" .
                 '                    }' . "\n" .
                 '' . "\n" .
-                '                    sendEmail(recipients, emailTitle, emailContent);' . "\n" .
+				'					 if(mail == 0 && state != 2){' . "\n" .
+                '                    	 sendEmail(recipients, emailTitle, emailContent);' . "\n" .
+				'					 }' . "\n" .
                 '                    updateNotificationVSXML(filePath,nodePath,newQuery,state);]]></param>' . "\n" .
                 '    </init-params>' . "\n" .
                 '    <output-structure />' . "\n" .
@@ -320,7 +353,7 @@ class ProdEmailNotifications extends CActiveRecord {
                 '    </stream>' . "\n" .
                 '  </streams>*/' . "\n" .
                 '</virtual-sensor>';
-        return $xml;
+	return $xml;
     }
 
     /**
@@ -328,31 +361,32 @@ class ProdEmailNotifications extends CActiveRecord {
      * @param <type> $id
      * @return string
      */
-     public function email_xml_file_above($id) {
-        $email_notification = new ProdEmailNotifications;
-        $email_notification = ProdEmailNotifications::model()->findByAttributes(array('notification_id' => $id));
+    public function email_xml_file_above($id) {
+	$email_notification = new ProdEmailNotifications;
+	$email_notification = ProdEmailNotifications::model()->findByAttributes(array('notification_id' => $id));
 
-        $sensor_data = new DiSensors();
-        $sensor_data = DiSensors::model()->findByAttributes(array('sensor_id' => $email_notification['sensor_id']));
+	$sensor_data = new DiSensors();
+	$sensor_data = DiSensors::model()->findByAttributes(array('sensor_id' => $email_notification['sensor_id']));
 
-        $gsn_data = new DiGsn();
-        $gsn_data = DiGsn::model()->findByAttributes(array('gsn_id' => $sensor_data['gsn_id']));
+	$gsn_data = new DiGsn();
+	$gsn_data = DiGsn::model()->findByAttributes(array('gsn_id' => $sensor_data['gsn_id']));
 
-        $user_data = new ProdUsers();
-        $user_data = ProdUsers::model()->findByAttributes(array('user_id' => $email_notification['prod_user_id']));
+	$user_data = new ProdUsers();
+	$user_data = ProdUsers::model()->findByAttributes(array('user_id' => $email_notification['prod_user_id']));
 
-        $sensor_information = "Sensor @ " . $gsn_data['gsn_name'] . " - " . $gsn_data['city'] . " " .
-                $gsn_data['state'] . ", latitude " . $sensor_data['location_y'] .
-                ", longitude " . $sensor_data['location_x'];
+	$sensor_information = "Sensor @ " . $gsn_data['gsn_name'] . " - " . $gsn_data['city'] . " " .
+		$gsn_data['state'] . ", latitude " . $sensor_data['location_y'] .
+		", longitude " . $sensor_data['location_x'];
 
 
-        $xml= '<?xml version="1.0" encoding="UTF-8"?>' . "\n".
+	        $xml= '<?xml version="1.0" encoding="UTF-8"?>' . "\n".
           '<virtual-sensor name="' . $email_notification['xml_name'] . '" priority="10">'. "\n" .
           '  <processing-class>'. "\n" .
           '    <class-name>gsn.processor.ScriptletProcessor</class-name>'. "\n" .
           '    <init-params>'. "\n" .
           '      <param name="persistant">false</param>'. "\n" .
           '      <param name="notification-state">0</param>'. "\n" .
+		  '		 <param name="mail-state">0</param>'. "\n" .
           '      <param name="scriptlet"><![CDATA['. "\n" .
           '                    //this is a start of a scriptlet'. "\n" .
           '                    //data definition'. "\n" .
@@ -365,19 +399,29 @@ class ProdEmailNotifications extends CActiveRecord {
           ''. "\n" .
           ''. "\n" .
           '                    def state = notificationState; //notification state variable is defined in scriptlet from init-params'. "\n" .
+		  '					   def mail = mailState;' . "\n" .
           '                    def nodePath ="streams/stream/query";'. "\n" .
-          '                    def EmailTitle ="";'. "\n" .
+          '                    def emailTitle ="";'. "\n" .
           '                    def emailContent="";'. "\n" .
           '                    def newQuery=""; '. "\n" .
           ' '. "\n" .
           '                    //end of data definition'. "\n" .
+		  '					   if(mail == 1){' . "\n" .
+		  '					   		if(state == 0){' . "\n" .
+		  '								mail = 0;' . "\n" .
+		  '								updateMailState(filePath, mail);' . "\n" .
+		  '							}' . "\n" .
+		  '							else{' . "\n" .
+		  '								state = 2;' . "\n" .
+		  '							}' . "\n" .
+		  '					   }' . "\n" .
           ' '. "\n" .
           '                    switch(state){'. "\n" .
           ' '. "\n" .
           '                          case 0: def delayTime = TIMED + delay;'. "\n" .
           '                                  newQuery = "select "+measuringUnit+", timed from source1 where (("+measuringUnit+">"+criticalValue+") and (timed >" + delayTime + ")) or ("+measuringUnit+"<="+criticalValue+")";'. "\n" .
           '                                  emailTitle = "Warning!";'. "\n" .
-          '                                  emailContent = "Dear ' . $user_data['first_name'] . " ".$user_data['last_name'] . ',\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' rised over "+criticalValue+".\nLast measured value is " + ' . $email_notification['unit_name_upper'] . ' + "!\n\n ' . $sensor_information . '";'. "\n" .
+          '                                  emailContent = "Dear user,\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' rised over "+criticalValue+".\nLast measured value is " + ' . $email_notification['unit_name_upper'] . ' + "!\nDisable notification on: http://161.53.67.224/lion/index.php/webService/NotificationDisableService?notification_id='.$id.'&type=E-mail\n\n ' . $sensor_information . '";'. "\n" .
           '                                  state++;'. "\n" .
           '                                  break;'. "\n" .
           ''. "\n" .
@@ -385,19 +429,33 @@ class ProdEmailNotifications extends CActiveRecord {
           '                                          def delayTime = TIMED + delay;'. "\n" .
           '                                          newQuery = "select "+measuringUnit+", timed from source1 where (("+measuringUnit+">"+criticalValue+") and (timed >" + delayTime + ")) or ("+measuringUnit+"<="+criticalValue+")";'. "\n" .
           '                                          emailTitle = "Warning again";'. "\n" .
-          '                                          emailContent = "Dear ' .$user_data['first_name'] . " ".$user_data['last_name']. ',\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' still over "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + ".\nDo something!\n\n ' . $sensor_information . '";'. "\n" .
+          '                                          emailContent = "Dear user,\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' still over "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + ".\nDo something!\nDisable notification on: http://161.53.67.224/lion/index.php/webService/NotificationDisableService?notification_id='.$id.'&type=E-mail\n\n ' . $sensor_information . '";'. "\n" .
           '                                  }'. "\n" .
           '                                  else{'. "\n" .
           '                                       newQuery = "select "+measuringUnit+", timed from source1 where "+measuringUnit+">"+criticalValue;'. "\n" .
           '                                       emailTitle = "Everything OK";'. "\n" .
-          '                                       emailContent = "Dear ' . $user_data['first_name'] . " ".$user_data['last_name'] . ',\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' dropped under "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + "!!!\nSensor readings are ok.\n\n ' . $sensor_information . '";'. "\n" .
+          '                                       emailContent = "Dear user,\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' dropped under "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + "!!!\nSensor readings are ok.\n\n ' . $sensor_information . '";'. "\n" .
           '                                       state=0;'. "\n" .
           ''. "\n" .
           '                                  }'. "\n" .
           '                                  break;'. "\n" .
+		  '							 case 2: if(' . $email_notification['unit_name_upper'] . '<=criticalValue){'. "\n" .
+		  '										  newQuery = "select "+measuringUnit+", timed from source1 where "+measuringUnit+">"+criticalValue;'. "\n" .
+		  '										  emailTitle = "Everything OK";'. "\n" .
+		  '										  emailContent = "Dear user,\n"+measuringUnit+" measured on ' . $email_notification['sensor_name'] . ' dropped under "+criticalValue+".\nMeasured value is " + ' . $email_notification['unit_name_upper'] . ' + "!!!\nSensor readings are ok.\n\n ' . $sensor_information . '";'. "\n" .
+		  '										  state = 0;' . "\n" .
+		  '										  mail = 0;' . "\n" .
+		  '										  updateMailState(filePath, mail);'. "\n" .
+		  '									 }' . "\n" .
+		  '									 else{'. "\n" .
+		  '									 	  newQuery = "select "+measuringUnit+", timed from source1 where "+measuringUnit+"<="+criticalValue;' . "\n" .
+		  '									 }' . "\n" .
+		  '									 break;'. "\n" .
           '                    }'. "\n" .
           ''. "\n" .
-          '                    sendEmail(recipients, emailTitle, emailContent);'. "\n" .
+		  '					   if(mail == 0 && state != 2){'. "\n" .
+          '                    	   sendEmail(recipients, emailTitle, emailContent);'. "\n" .
+		  '					   }'. "\n" .
           '                    updateNotificationVSXML(filePath,nodePath,newQuery,state);]]></param>' . "\n" .
           '    </init-params>' . "\n" .
           '    <output-structure />' . "\n" .
@@ -417,7 +475,7 @@ class ProdEmailNotifications extends CActiveRecord {
           '    </stream>' . "\n" .
           '  </streams>*/' . "\n" .
           '</virtual-sensor>';
-        return $xml;
+	return $xml;
     }
 
 }

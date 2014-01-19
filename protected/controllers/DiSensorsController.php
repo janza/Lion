@@ -89,14 +89,20 @@ class DiSensorsController extends Controller
 
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
+		
 
 		if(isset($_POST['DiSensors']))
 		{
-			$model->attributes=$_POST['DiSensors'];
+			$model->attributes=$_POST['DiSensors'];				
+				
+			if ($model->attributes['date_deactivated_id'] == '')
+				$model->setAttribute('date_deactivated_id', null);
+
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->sensor_id));
 		}
-
+		else echo 'Nisam!';
+		
 		$this->render('update',array(
 			'model'=>$model,
 		));

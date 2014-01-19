@@ -57,37 +57,56 @@ class AdminController extends Controller {
     public function actionAdminReportsManaging() {
 	$model = new AdminReportsManaging;
 
-	if (isset($_REQUEST['report_id'])) {
-	    if ($_REQUEST['type_int'] == 1) { //daily report
+	if (isset($_GET['report_id'])) {
+	    $model->message = date('d.m.Y h:i.s')." Your action concerning report number ".$_GET['report_id'];
+
+	    if ($_GET['type_int'] == 1) { //daily report
+		$model->message .= ", daily, ";
 		$report = new DailyReports;
-		$report = DailyReports::model()->findByAttributes(array('report_id' => $_REQUEST['report_id']));
-	    } else if ($_REQUEST['type_int'] == 2) {//monthly report
+		$report = DailyReports::model()->findByAttributes(array('report_id' => $_GET['report_id']));
+	    } else if ($_GET['type_int'] == 2) {//monthly report
+		$model->message .= ", monthly, ";
 		$report = new MonthlyReports;
-		$report = MonthlyReports::model()->findByAttributes(array('report_id' => $_REQUEST['report_id']));
+		$report = MonthlyReports::model()->findByAttributes(array('report_id' => $_GET['report_id']));
 	    }
 
-	    if (isset($_REQUEST['sending'])) {
-		if ($report->is_sending == '1')
+	    if (isset($_GET['sending'])) {
+		if ($report->is_sending == '1'){
 		    $report->is_sending = '0';
-		else
+		    $model->message .= "stop sending, ";
+		}
+		else{
 		    $report->is_sending = '1';
-		$report->save();
+		    $model->message .= "start sending, ";
+		}
+		if ($report->save())
+		    $model->message .= " was successfull!";
+		else
+		    $model->message .= " was NOT successfull!";
 	    }
-	    else if (isset($_REQUEST['delete'])) {
+	    else if (isset($_GET['delete'])) {
 		if ($report->delete())
-		    $text = "Delete of report was successful!";
+		    $model->message .= "was successfully deleted";
 		else
-		    $text = "Delete of report was unseccessful!";
+		    $model->message .= "was NOT successfully deleted";
 	    }
-	    else if (isset($_REQUEST['request'])) {
-		if ($report->is_active == '1')
+	    else if (isset($_GET['request'])) {
+		if ($report->is_active == '1'){
+		    $model->message .= "decline process";
 		    $report->is_active = '0';
-		else
+		}
+		else{
+		    $model->message .= "approve process";
 		    $report->is_active = '1';
-		$report->save();
+		}
+		if ($report->save())
+		    $model->message .= " was successfull!";
+		else
+		    $model->message .= " was NOT successfull!";
 	    }
 	}
-
+	//$this->renderPartial('_report_partial_view',array('model'=>$model,));
+	unset($_GET['report_id']);
 	$this->render('adminReportsManaging', array('model' => $model));
     }
 
@@ -111,12 +130,12 @@ class AdminController extends Controller {
 		if ($model_privilege->is_active == '1') {
 		    $model_privilege->is_active = '0';
 		    if ($model_privilege->save())
-			$this->redirect(array('site/adminGsnPrivileges'));
+			$this->redirect(array('admin/adminGsnPrivileges'));
 		}
 		else {
 		    $model_privilege->is_active = '1';
 		    if ($model_privilege->save())
-			$this->redirect(array('site/adminGsnPrivileges'));
+			$this->redirect(array('admin/adminGsnPrivileges'));
 		}
 	    }
 	    /* else
@@ -193,7 +212,7 @@ class AdminController extends Controller {
 				$body = "File was NOT successfully removed! Please make a manual check on the problem!\nIt seems that the connection could not be established.\nNotification ID: " . $email_notification->notification_id . "\nError message: " . $e->getMessage();
 			    }
 
-			    mail("hyracoidea@gmail.com", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
+			    //mail("hyracoidea@gmail.com", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
 
 
 			    if (isset($_REQUEST['action'])) {
@@ -280,7 +299,7 @@ class AdminController extends Controller {
 				$body = $body . "\nFile was NOT successfully removed! Please make a manual check on the problem!\nIt seems that the connection could not be established.\nNotification ID: " . $email_notification->notification_id . "\nError message: " . $e->getMessage();
 			    }
 
-			    mail("hyracoidea@gmail.com", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
+			    //mail("hyracoidea@gmail.com", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
 
 			    if (isset($_REQUEST['action'])) {
 				if ($sms_notification->delete())
@@ -297,7 +316,7 @@ class AdminController extends Controller {
 		    }
 		    else
 		    if (isset($_REQUEST['action'])) {
-			if ($email_sms->delete())
+			if ($sms_notification->delete())
 			    $body.="\nNotification successfuly deleted!";
 			else
 			    $body.="\nNotification could not be deleted!";
@@ -367,7 +386,6 @@ class AdminController extends Controller {
 					$body.="\nNotification backup folder exists!\n";
 				    else
 					$body.="\nNotification backup folder does not exist!\n";
-
 				    $sftp_obj->chdir($gsn_row['notification_backup_folder']);
 				    $sftp_obj->removeFile($email_notification->xml_name . ".xml");
 				} catch (Exception $er) {
@@ -375,12 +393,12 @@ class AdminController extends Controller {
 				}
 				//if this was successful we need to inform our administrator about the action
 				if ($body == "")
-				    $body = "File was succesfully removed!\nGSN name: " . $gsn_row['gsn_name'] . "Notification ID: " . $email_notification->nofitication_id;
+				    $body = "File was succesfully removed!\nGSN name: " . $gsn_row['gsn_name'] . "Notification ID: " . $email_notification->watchdog_id;
 			    } catch (Exception $e) {
 				$body = "File was NOT successfully removed! Please make a manual check on the problem!\nIt seems that the connection could not be established.\nNotification ID: " . $email_notification->watchdog_id . "\nError message: " . $e->getMessage();
 			    }
 
-			    mail("hyracoidea@gmail.com", $subject, $start . "\n" . $body . "Watchdog request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
+			    mail("leonard.beus@fer.hr", $subject, $start . "\n" . $body . "Watchdog request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
 
 
 			    if (isset($_REQUEST['action'])) {
@@ -391,7 +409,7 @@ class AdminController extends Controller {
 			    }
 			    else
 			    if ($email_notification->save()) {
-				mail("hyracoidea@gmail.com", $subject, $body, $headers);
+				mail("leonard.beus@fer.hr", $subject, $body, $headers);
 				$this->redirect(array('admin/adminWatchdogRequests'));
 			    }
 			}
@@ -416,7 +434,7 @@ class AdminController extends Controller {
 		else
 		    $body = "There was no email watchdog timer request with WatchDog ID: " . $_REQUEST['watchdog_id'];
 
-		mail("hyracoidea@gmail.com", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
+		mail("leonard.beus@fer.hr", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
 	    }
 	    else {
 
@@ -463,12 +481,12 @@ class AdminController extends Controller {
 				}
 				//if this was successful we need to inform our administrator about the action
 				if ($body == "")
-				    $body = $body . "\nFile was succesfully removed!\nGSN name: " . $gsn_row['gsn_name'] . "Notification ID: " . $sms_notification->nofitication_id;
+				    $body = $body . "\nFile was succesfully removed!\nGSN name: " . $gsn_row['gsn_name'] . "Notification ID: " . $sms_notification->watchdog_id;
 			    } catch (Exception $e) {
-				$body = $body . "\nFile was NOT successfully removed! Please make a manual check on the problem!\nIt seems that the connection could not be established.\nNotification ID: " . $email_notification->notification_id . "\nError message: " . $e->getMessage();
+				$body = $body . "\nFile was NOT successfully removed! Please make a manual check on the problem!\nIt seems that the connection could not be established.\nNotification ID: " . $email_notification->watchdog_id . "\nError message: " . $e->getMessage();
 			    }
 
-			    mail("hyracoidea@gmail.com", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
+			    mail("leonard.beus@fer.hr", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
 
 			    if (isset($_REQUEST['action'])) {
 				if ($sms_notification->delete())
@@ -485,7 +503,7 @@ class AdminController extends Controller {
 		    }
 		    else
 		    if (isset($_REQUEST['action'])) {
-			if ($email_sms->delete())
+			if ($sms_notification->delete())
 			    $body.="\nWatchdog timer successfuly deleted!";
 			else
 			    $body.="\nWatchdog timer could not be deleted!";
@@ -500,7 +518,7 @@ class AdminController extends Controller {
 		else
 		    $body .= "\nThere was no email watchdog request with Watchdog ID: " . $_REQUEST['watchdog_id'];
 
-		mail("hyracoidea@gmail.com", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
+		mail("leonard.beus@fer.hr", $subject, $start . "\n" . $body . "Notification request deleting process finished! Time: " . date('Y-m-d H:i:s'), $headers);
 	    }
 	}
 

@@ -57,6 +57,7 @@ $this->breadcrumbs = array(
 		'sftp_password',
 		'notification_folder',
 		'notification_backup_folder',
+		'gsn_home_folder',
 	    /*
 	      'last_change',
 	      'is_dummy',

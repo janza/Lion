@@ -52,6 +52,7 @@
             <div id="sidemenu">
                 <?php
                 $this->widget('zii.widgets.CMenu', array(
+                    'itemCssClass' => 'nav',
                     'items' => array(
                         array('label' => 'New', 'url' => array('/user/userWatchdogTimer')),
                         array('label' => 'SMS watchdog timer', 'url' => array('/user/userSmsWatchdogRequests')),

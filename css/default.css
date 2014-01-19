@@ -1,6 +1,6 @@
 /*
-	Maximus4T by 4Templates | http://www.4templates.com/free/ | @4templates
-	Licensed under the Creative Commons Attribution 3.0 License
+    Maximus4T by 4Templates | http://www.4templates.com/free/ | @4templates
+    Licensed under the Creative Commons Attribution 3.0 License
 */
 
 html, body {
@@ -11,7 +11,6 @@ body {
     margin: 0px;
     padding: 0px;
     background: #E6E6E6 url("../images/wrapper-bg.jpg") repeat;
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     font-size: 13px;
     color: #4B4B4B;
 }
@@ -19,8 +18,7 @@ body {
 h1, h2, h3 {
     margin: 0px;
     padding: 0px;
-    font-family: 'Oswald', sans-serif;
-    font-weight: 400;
+    font-weight: bold;
 }
 
 p, ol, ul {
@@ -82,21 +80,25 @@ hr {
 /** HEADER */
 
 #header-wrapper {
-    height: 161px;
-    background: url("../images/header-bg.png") repeat-x left top;
+    height: 120px;
+    background: url("../images/header-bg-medium.png") repeat-x left top;
+/*    height: 100px;
+    background: url("../images/header-bg_small.png") repeat-x left top;*/
 }
 
 #header {
     overflow: hidden;
     width: 940px;
-    height: 161px;
+    /*height: 100px;*/
+    height:120px;
     margin: 0px auto;
 }
 
 /** LOGO */
 
 #logo {
-    height: 100px;
+    /*height: 100px;*/
+    height:120px;
 }
 
 #logo h1, #logo p {
@@ -107,7 +109,7 @@ hr {
 #logo h1 a {
     display: block;
     float: left;
-    padding: 65px 0px 0px 0px;
+    padding: 5px 0px 0px 0px;
     letter-spacing: -2px;
     text-decoration: none;
     text-shadow: 2px 2px 2px #222222;
@@ -117,9 +119,9 @@ hr {
 
 #logo p {
     float: right;
-    padding: 85px 0px 0px 0px;
+    padding: 25px 0px 0px 0px;
     text-shadow: 1px 1px 1px #222222;
-    font-family: 'Oswald', sans-serif;
+    font-weight: bold;
     font-size: 18px;
     color: #B5B5B5;
 }
@@ -127,31 +129,34 @@ hr {
 /** MENU */
 
 #menu-wrapper {
-    width: 954px;
+    width: 950px;
     height: 77px;
     margin: 30px auto 0px auto;
     padding: 0px 60px;
     background: url("../images/menu-content-bg.png") no-repeat left top;
 }
 
+/*s
 #menu-content {
     float: left;
     width: 954px;
     height: 62px;
     margin: 0px;
     padding: 15px 0px 0px 0px;
-}
+}*/
 
 #menu {
+/*    position:fixed;*/
+    width: 1000px;
+    padding: 71px 0px 0px 0px;
     height: 36px;
     margin: 0px;
-    padding: 0px;
     list-style: none;
     line-height: 36px;
     text-decoration: none;
     text-shadow: 1px 1px 1px #191919;
-    font-family: 'Oswald', sans-serif;
-    font-size: 13px;
+    font-weight: bold;
+    font-size: 12px;
     color: #FFFFFF;
 }
 
@@ -169,6 +174,17 @@ hr {
 #menu a:hover {
     text-decoration: none;
 }
+#menu a span {
+    border-bottom: 2px solid transparent;
+    -webkit-transition: all 0.2s;
+       -moz-transition: all 0.2s;
+        -ms-transition: all 0.2s;
+         -o-transition: all 0.2s;
+            transition: all 0.2s;
+}
+#menu a:hover span {
+    border-bottom: 2px solid #fff;
+}
 
 #menu .arrow {
     background: url("../images/menu_bg05.png") no-repeat right top;
@@ -177,7 +193,8 @@ hr {
 #menu li span {
     display: block;
     height: 36px;
-    padding: 0px 20px 0px 20px;
+    padding: 0px 10px 0px 10px;
+    text-align: center;
     text-shadow: 1px 1px 1px #171717;
 }
 
@@ -187,7 +204,6 @@ hr {
 
 #menu li.first span {
     height: 36px;
-    padding-right: 20px;
     background: url("../images/menu-first-bgright.png") no-repeat right top;
     text-shadow: 1px 1px 1px #3E656D;
 }
@@ -309,28 +325,30 @@ hr {
     width: 1070px;
     margin: 0px auto;
 }
-
+/*
 #page .bgtop {
-    height: 5px;
-    background: url("../images/page-content-bg-01.png") no-repeat center top;
+    border-top: 1px solid #ccc;
+    margin: 0 auto;
+    width: 1000px;
 }
 
 #page .bgbtm {
-    height: 5px;
-    background: url("../images/page-content-bg-02.png") no-repeat center bottom;
+    border-top: 1px solid #ccc;
+    margin: 0 auto;
+    width: 1000px;
 }
-
+*/
 #page .content-bg {
     overflow: hidden;
-    padding: 20px 0px 50px 0px;
-    background: url("../images/page-content-bg-02.png") repeat-y center top;
+    padding: 20px 25px 50px;
+    background: #fff;
+    margin: 0 50px;
+    border: 1px solid #ddd;
 }
 
 /** CONTENT */
 
 #content {
-    float: left;
-    width: 735px;
 }
 
 /** SIDEBAR */
@@ -383,7 +401,7 @@ hr {
 
 #footer {
     overflow: hidden;
-    height: 165px;
+    height: 80px;
 }
 
 #footer p {
@@ -405,6 +423,7 @@ hr {
 }
 
 #footer-content {
+    display: none;
     width: 1000px;
     margin: 0px auto;
     text-shadow: 1px 1px 0px rgba(255, 255, 255, 1);
@@ -428,7 +447,8 @@ hr {
 
 #footer-content .content-bg {
     overflow: hidden;
-    padding: 60px 50px 50px 65px;
+/*    padding: 60px 50px 50px 65px;*/
+    padding: 20px 50px 10px 65px;
     background: url("../images/footer-content-bg-02.png") repeat-y left top;
 }
 
@@ -464,12 +484,12 @@ hr {
     margin: 0px;
     padding: 0px 0px 0px 0px;
     letter-spacing: -2px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 40px;
+    font-size: 26px;
     color: #2E2E2E;
 }
 
 .post .date {
+    display: none;
     overflow: hidden;
     float: left;
     width: 65px;
@@ -497,7 +517,7 @@ hr {
 
 .post .entry {
     overflow: hidden;
-    padding: 30px 75px 0px 110px;
+    padding: 10px 0 10px;
 }
 
 .post .img-style1 {
@@ -505,11 +525,12 @@ hr {
 }
 
 .post .posted {
+    display: none;
     margin-top: -5px;
-    padding: 0px 0px 0px 30px;
+    padding: 0px 0px 0px 10px;
+    text-transform: uppercase;
     background: url("../images/post-posted-bg.png") no-repeat left top;
-    font-family: 'Oswald', sans-serif;
-    font-size: 16px;
+    font-size: 12px;
     color: #A9A9A9;
 }
 
@@ -558,7 +579,7 @@ hr {
 #banner-wrapper {
     overflow: hidden;
     width: 970px;
-    height: 325px;
+    height: 150px;
     margin: 0px auto;
     padding: 20px 0px 0px 30px;
     background: url("../images/banner-wrapper-bg.png") repeat-y left top;
@@ -566,33 +587,27 @@ hr {
 
 #banner {
     width: 960px;
-    height: 297px;
+    height: 122px;
     position: relative;
-    background: url("../images/banner-image-border.jpg") no-repeat left top;
+    background: url("../images/banner-image-border_2.jpg") no-repeat left top;
 }
 
-#banner .image, #banner .caption1, #banner .caption2, #banner .border {
-    position: absolute;
+#banner .image, #banner .caption1, #banner .caption2 {
+    position: relative;
 }
 
 #banner .image {
     width: 900px;
-    height: 257px;
+    height: 82px;
     top: 20px;
     left: 20px;
 }
 
 #banner .border {
     width: 960px;
-    height: 297px;
+    height: 122px;
     top: 0px;
     left: 0px;
-}
-
-div.breadcrumbs
-{
-    font-size: 0.9em;
-    padding: 5px 20px;
 }
 
 div.breadcrumbs span
@@ -647,3 +662,33 @@ div.compactRadioGroup INPUT {
 #type5 .topRight {height:140px;}
 #type5 .bottomLeft {background-position:-1px -142px;}
 #type5 .bottomRight {background-position:-19px -142px;}
+
+
+.nbanner { position: relative; padding:0; margin:0; font: normal 12px Arial,Helvetica,sans-serif; }
+.nbanner a img { border:none; padding:0; margin:0; }
+.nbanner ul{ padding:0; margin: 0; }
+.nbanner ul.slides { margin:0; }
+.nbanner ul.slides li.slide { list-style-type:none; visibility:hidden; position:absolute; left:0; top:0; }
+.nbanner ul.buttons { }
+.nbanner ul.buttons li { float:left; font-size: 10px; display:inline; height:0px; width: 14px; padding:14px 0 0 0; margin:0 0 0 5px; background: url('bgli.gif') 0 0 no-repeat; cursor: pointer; overflow: hidden; }
+.nbanner ul.buttons li:hover { background: url('bgli.gif') -15px 0 no-repeat; }
+.nbanner ul.buttons li.active{ background: url('bgli.gif') -30px 0 no-repeat; }
+.nbanner .cclear{ clear: both; }
+
+#center250b{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    border: none;
+    z-index: 50;
+}
+
+#fixedtop2{
+    margin: auto; background: url(\"../images/header-bg_small.png\") repeat-x left top;
+}
+
+#page_main{
+    margin:120px 0px 0px 0px;
+    border-top:#FFFFFF;
+}

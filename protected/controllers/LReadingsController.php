@@ -192,32 +192,72 @@ class LReadingsController extends ERestController
 
 	public function doCustomRestPostSearch($data)
 	{
-		$condition = '(0=1) ';
 
-		foreach ($data as $key => $value) {
-			$condition .= 'OR (';
-			foreach ($value as $i => $v) {
-				$condition .= $i . ' = ' . $v . ' AND ';
+		$startTime = $data['startTime'];
+		$endTime = $data['endTime'];
+		$startDate = $data['startDate'];
+		$endDate = $data['endDate'];
+		$sameDate = ') OR (';
+		if ( $startDate == $endDate ) $sameDate = ') AND (';
+
+
+		$condition = '((time_id >= ' . $startTime . ' AND ';
+		$condition .= 'date_id = ' . $startDate . $sameDate;
+		$condition .= 'time_id <= ' . $endTime . ' AND ';
+		$condition .= 'date_id = ' . $endDate . ') OR ';
+		$condition .= '(date_id > '. $startDate.' AND date_id < '. $endDate .')) AND ';
+		$condition .= '(';
+
+
+		$unitcount = count($data['units']);
+
+		foreach ( $data['units'] as $key => $value ) {
+
+			$condition .= '(unit_id = ' . $value['unit_id'] . ' AND ';
+			$condition .= 'sensor_id = ' . $value['sensor_id'] . ')';
+
+			if ( $key == $unitcount - 1 ) {
+				$condition .= ')';
+			} else {
+				$condition .= ' OR ';
 			}
 
-			$condition .= ' 1=1) ';
 		}
 
-		$criteria = array(
-			'select'=>'gsn_id, sensor_id, unit_id, date_id, time_id, value',
-			'distinct'=>true,
-			'order'=>'time_id',
-			'condition'=>$condition
-		);
+		$criteria = new CDbCriteria(array(
+			'select' => 'gsn_id, sensor_id, unit_id, date_id, time_id, value, reading_id',
+			'distinct' => true,
+			'order' => 'date_id,time_id',
+			'condition' => $condition
+		));
 
-		$readings = LReadings::model()->findAll($criteria);
+
+		$lreadings = LReadings::model()->findAll($criteria);
+		$freadings = FReadings::model()->findAll($criteria);
+		$outdata = array_merge( $freadings, $lreadings );
+
+
+		$datacount = count($outdata);
+
+
+		// get only 100 points
+		/*
+		if ( $datacount > 150 ) {
+			$temp = array();
+			for ($i = 0; $i < $datacount - $unitcount; $i += ceil($datacount / 120)) {
+				for ($j = 0; $j < $unitcount; $j++) {
+					$temp[] = $outdata[$i+$j];
+				}
+			}
+			$outdata = $temp;
+		}
+		*/
 
 		$this->renderJson(array(
-			'success'=>true,
-			'message'=>'Records Retrieved Successfully',
-			'test'=>$criteria,
-			'test2'=>$data,
-			'data'=>$readings
+			'success' => true,
+			'message' => 'Records Retrieved Successfully',
+			'test' => $condition,
+			'data' => $outdata,
 		));
 
 	}

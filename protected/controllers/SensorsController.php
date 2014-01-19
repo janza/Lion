@@ -178,35 +178,47 @@ class SensorsController extends ERestController
 		}
 	}
 
+	private function joinSensorsAndTypes($sensors) 
+	{
+		foreach ( $sensors as $i => $sensor ) {
+			$sensors[$i]->sensor_type = $sensors[$i]->units;
+			$sensors[$i]->gsn_id = array(
+				'gsn_id' => $sensors[$i]->gsn_id,
+				'gsn_name' => $sensors[$i]->diGsn['gsn_name']
+			);
+			if ($sensors[$i]->is_active == "0") {
+				$sensors[$i]->is_active = false;
+			} else {
+				$sensors[$i]->is_active = true;
+			}
+		}
+		return $sensors;
+	}
+
 	public function doRestList()
 	{
-		$senzori = Sensors::model()->with('sensorTypes')->findAll();
+		$sensors = Sensors::model()->with( array('sensorTypes', 'diGsn') )->findAll();
 
-		foreach ($senzori as $i => $senzor) {
-
-			$senzori[$i]->sensor_type = $senzori[$i]->units;
-		}
+		$sensors = $this->joinSensorsAndTypes($sensors);
 
 		$this->renderJson(array(
 			'success'=>true,
 			'message'=>'Records Retrieved Successfully',
-			'data'=>$senzori
+			'data'=>$sensors
 		));
 	}
 
+
 	public function doCustomRestPostSearch($data)
 	{
-		$senzori = Sensors::model()->with('sensorTypes')->findAllByAttributes($data);
+		$sensors = Sensors::model()->with( 'sensorTypes', 'diGsn' )->findAllByAttributes($data);
 
-		foreach ($senzori as $i => $senzor) {
-
-			$senzori[$i]->sensor_type = $senzori[$i]->units;
-		}
+		$sensors = $this->joinSensorsAndTypes($sensors);
 
 		$this->renderJson(array(
 			'success'=>true,
 			'message'=>'Records Retrieved Successfully',
-			'data'=>$senzori
+			'data'=>$sensors
 		));
 	}
 }

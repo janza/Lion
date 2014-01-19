@@ -10,13 +10,17 @@
 	<!--[if lt IE 8]>
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/ie.css" media="screen, projection" />
 	<![endif]-->
+        <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/tableDesign.css" />
 
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/main.css" />
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/form.css" />	
           <style type="text/css">
-          body {
-            font-size: 10px;
-          }
+	    body{
+		margin:auto;
+		font-size: 14px;
+		position: relative; text-align: center;
+	    }
+	    .break { page-break-before: always; }
           </style>
 </head>
 
@@ -30,8 +34,7 @@
 
 	<div id="footer">
 		Copyright &copy; <?php echo date('Y'); ?> by FER.<br/>
-		All Rights Reserved.<br/>
-                Matija Renić, Luka Postružin<br/>
+		All Rights Reserved.
 	</div><!-- footer -->
 
 </div><!-- page -->
