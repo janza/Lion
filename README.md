@@ -10,3 +10,32 @@ Some of the options that we have developed are:
 - automatical system for sending reports to your address
 
 The system is designed in a way that allows parallel operation of a large number of users, and managing many subsystems based on Global Sensor Networks server to collect data. Also, we allow you to monitor and react in any process you are having. 
+
+
+Installation
+==
+
+
+Lion is based on Yii php Framework (http://www.yiiframework.com/).
+It's source can be found at https://github.com/yiisoft/yii.
+
+Lion requires working webserver with php support and some php modules (gd and postgres driver).
+On ubuntu this can be installed with:
+
+    sudo apt-get install apache2 libapache2-mod-php5 php5-pgsql php5-gd
+    
+after that make sure apache server is started by running :
+
+    service apache2 restart
+    
+Change directory to /var/www which is apache default root for serving the files. Clone Yii and Lion sources (or unzip the archives). 
+
+    cd /var/www
+    git clone https://github.com/janza/lion lion
+    git clone https://github.com/yiisoft/Yii Yii
+    
+After this update Lion config file (lion/protected/config/main.php) to point to the correct database, or just use sqlite for development. 
+
+By going to http://127.0.0.1/lion one should be able to see Lion start page and to login to the system.
+
+
