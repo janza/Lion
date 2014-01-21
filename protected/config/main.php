@@ -117,7 +117,7 @@ return array(
          */
 
         'db' => array(
-            'connectionString' => 'pgsql:host=localhost;port=5432;dbname=coldwatchDB',
+            'connectionString' => 'pgsql:host=localhost;port=5432;dbname=postgres',
             'username' => 'coldwatch',
             'password' => 'coldwatch',
         ),
