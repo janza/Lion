@@ -5,7 +5,7 @@ $this->breadcrumbs=array(
 );
 ?>
 <div class="post">
-    <p class="date"><?php echo date("M"); ?><b><?php echo date("j"); ?></b></p>
+
     <h2 class="title">Watchdog reviewing</h2>
     <p class="posted">Lion development team</p>
     <div class="entry">
@@ -16,7 +16,7 @@ $this->breadcrumbs=array(
             (
                 select s.phone as recipient, s.watchdog_id, s.sensor_id, s.user_id, s.xml_name, s.critical_period, s.is_active, s.minimal_delay_between_emails, \'SMS\' as type
                 from prod_sms_watchdog_timer s
-                union all 
+                union all
                 select e.email as recipient, e.watchdog_id, e.sensor_id, e.user_id, e.xml_name, e.critical_period, e.is_active, e.minimal_delay_between_emails, \'E-mail\' as type
                 from prod_email_watchdog_timer e
             ) n

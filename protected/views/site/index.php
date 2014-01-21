@@ -6,7 +6,7 @@ $this->breadcrumbs = array(
 ?>
 
 <div class="post">
-    <p class="date"><?php echo date("M"); ?><b><?php echo date("j"); ?></b></p>
+    <p class="date"><?php echo gmdate("M"); ?><b><?php echo gmdate("j"); ?></b></p>
     <h2 class="title">Welcome to Lion</h2>
     <p class="posted">Lion development team</p>
     <div class="entry">

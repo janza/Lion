@@ -205,7 +205,7 @@
 	    <div class="bgbtm"></div>
 	</div>
         <div id="footer">
-            <p>Copyright &copy; <?php echo date('Y'); ?> by FER, University of Zagreb.</p>
+            <p>Copyright &copy; <?php echo gmdate('Y'); ?> by FER, University of Zagreb.</p>
             <p>All Rights Reserved.</p>
         </div><!-- footer -->
     </body>

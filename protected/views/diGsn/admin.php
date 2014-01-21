@@ -19,7 +19,7 @@ $('.search-form form').submit(function(){
 ?>
 
 <div class="post">
-    <p class="date"><?php echo date("M"); ?><b><?php echo date("j"); ?></b></p>
+
     <h2 class="title">Manage GSN servers</h2>
     <p class="posted">Lion development team</p>
     <div class="entry">

@@ -5,7 +5,7 @@ $this->breadcrumbs = array(
 );
 ?>
 <div class="post">
-    <p class="date"><?php echo date("M"); ?><b><?php echo date("j"); ?></b></p>
+
     <h2 class="title">Notification requests</h2>
     <p class="posted">Lion development team</p>
     <div class="entry">
@@ -16,7 +16,7 @@ $this->breadcrumbs = array(
             (
                 select s.criteria_type, s.phone as recipient, s.notification_id, s.sensor_id, s.prod_user_id, s.xml_name, s.critical_value, s.is_active, s.resending_interval, \'SMS\' as type
                 from prod_sms_notifications s
-                union all 
+                union all
                 select e.criteria_type, e.email as recipient, e.notification_id, e.sensor_id, e.prod_user_id, e.xml_name, e.critical_value, e.is_active, e.resending_interval, \'E-mail\' as type
                 from prod_email_notifications e
             ) n

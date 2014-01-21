@@ -6,7 +6,7 @@ $this->breadcrumbs = array(
 ?>
 
 <div class="post">
-    <p class="date"><?php echo date("M"); ?><b><?php echo date("j"); ?></b></p>
+
     <h2 class="title">Update user, <?php echo $model->user_id; ?></h2>
     <p class="posted">Lion development team</p>
     <div class="entry">

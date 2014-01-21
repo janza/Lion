@@ -712,7 +712,7 @@ div.compactRadioGroup INPUT {
 	    <div class="content-bg">
 		<div id="content">
 <div class="post">
-    <p class="date"><?php echo date("M"); ?><b><?php echo date("j"); ?></b></p>
+
     <h2 class="title">Contact us</h2>
     <p class="posted">Lion development team</p>
 
